@@ -1,0 +1,60 @@
+package com.finanzapp.app_financiera.controllers;
+
+import com.finanzapp.app_financiera.models.Record;
+import com.finanzapp.app_financiera.services.RecordService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/records")
+public class RecordController {
+
+    private final RecordService recordService;
+
+    @Autowired
+    public RecordController(RecordService recordService) {
+        this.recordService = recordService;
+    }
+
+    // Devuelve todos los records
+    @GetMapping
+    public ResponseEntity<List<Record>> getAllRecords() {
+        List<Record> records = recordService.findAll();
+        return ResponseEntity.ok(records);
+    }
+
+    // Crea un nuevo record
+    @PostMapping
+    public ResponseEntity<Record> createRecord(@RequestBody Record record) {
+        Record newRecord = recordService.agregarRecord(record);
+        return new ResponseEntity<>(newRecord, HttpStatus.CREATED);
+    }
+
+    // Actualiza un record existente
+    @PutMapping("/{id}")
+    public ResponseEntity<Record> updateRecord(@PathVariable String id, @RequestBody Record record) {
+        Record updatedRecord = recordService.update(id, record);
+        return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
+    }
+
+    // Elimina un record por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRecord(@PathVariable String id) {
+        recordService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)\n    // Ejemplo de uso: /api/records/buscar?query=gasto&lastPeriod=12 semanas
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Record>> buscarRecords(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String lastPeriod) {
+        List<Record> records = recordService.buscarPorFiltros(query, lastPeriod);
+        return new ResponseEntity<>(records, HttpStatus.OK);
+    }
+}
+
