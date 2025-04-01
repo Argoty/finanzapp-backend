@@ -42,7 +42,7 @@ public class RecordController {
     }
 
     // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)\n    // Ejemplo de uso: /api/records/buscar?query=gasto&lastPeriod=12 semanas
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Record>> buscarRecords(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String lastPeriod) {

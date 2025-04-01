@@ -42,7 +42,7 @@ public class PlannedPaymentController {
     }
 
     // Busca pagos planeados usando filtros de búsqueda y período reciente
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<PlannedPayment>> buscarPagos(
             @RequestParam(required = false) String query) {
         List<PlannedPayment> pagos = pagoService.buscarPorFiltros(query);
