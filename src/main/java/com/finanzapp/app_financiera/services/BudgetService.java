@@ -52,10 +52,6 @@ public class BudgetService {
         return budget;
     }
 
-    public List<Budget> findAll() {
-        return budgetRepository.findAll();
-    }
-
     public List<Budget> buscarPorFiltros(String query, String period) {
         return budgetRepository.buscarPorFiltros(query, period);
     }

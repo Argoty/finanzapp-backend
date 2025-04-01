@@ -59,11 +59,6 @@ public class RecordService {
         return record;
     }
 
-    // Retorna todos los records
-    public List<Record> findAll() {
-        return recordRepository.findAll();
-    }
-
     // Busca records usando un query de búsqueda y un filtro de tiempo (por ejemplo: \"1 semana\", \"1 mes\", etc.)
     public List<Record> buscarPorFiltros(String query, String lastPeriod) {
         return recordRepository.buscarPorFiltros(query, lastPeriod);

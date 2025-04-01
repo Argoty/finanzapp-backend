@@ -20,12 +20,6 @@ public class PlannedPaymentController {
         this.pagoService = pagoService;
     }
 
-    // Devuelve todos los pagos planeados
-    @GetMapping
-    public ResponseEntity<List<PlannedPayment>> getAllPagos() {
-        return ResponseEntity.ok(pagoService.findAll());
-    }
-
     // Crea un nuevo pago planeado
     @PostMapping
     public ResponseEntity<PlannedPayment> createPago(@RequestBody PlannedPayment pago) {
@@ -48,7 +42,7 @@ public class PlannedPaymentController {
     }
 
     // Busca pagos planeados usando filtros de búsqueda y período reciente
-    @GetMapping("/buscar")
+    @GetMapping("/")
     public ResponseEntity<List<PlannedPayment>> buscarPagos(
             @RequestParam(required = false) String query) {
         List<PlannedPayment> pagos = pagoService.buscarPorFiltros(query);

@@ -64,10 +64,6 @@ public class PlannedPaymentService {
         return pago;
     }
 
-    public List<PlannedPayment> findAll() {
-        return pagoRepository.findAll();
-    }
-
     public List<PlannedPayment> buscarPorFiltros(String query) {
         return pagoRepository.buscarPorFiltros(query);
     }
