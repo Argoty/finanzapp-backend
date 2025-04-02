@@ -21,12 +21,6 @@ public class BudgetController {
         this.budgetService = budgetService;
     }
 
-    // Devuelve todos los presupuestos
-    @GetMapping
-    public ResponseEntity<List<Budget>> getAllBudgets() {
-        return ResponseEntity.ok(budgetService.findAll());
-    }
-
     // Crea un nuevo presupuesto
     @PostMapping
     public ResponseEntity<Budget> createBudget(@RequestBody Budget budget) {
