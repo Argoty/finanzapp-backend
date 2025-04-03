@@ -10,6 +10,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class Saving {
     private final String id = UUID.randomUUID().toString();
+    @NonNull private String userId;
     @NonNull private String title;
     @NonNull private  double accumulatedAmount ;
     @NonNull private double goaldAmount;
