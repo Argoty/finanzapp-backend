@@ -19,9 +19,9 @@ public class SavingController {
         this.savingService = savingService;
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<Saving>> findAllSavings() {
-        return ResponseEntity.ok(savingService.findAllSavings());
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Saving>> findAllSavings(@PathVariable String userId) {
+        return ResponseEntity.ok(savingService.findAllSavings(userId));
     }
 
     @PostMapping("")
