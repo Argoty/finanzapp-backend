@@ -8,14 +8,18 @@ import java.util.UUID;
 @Data
 @RequiredArgsConstructor
 public class Budget {
+
     private String id = UUID.randomUUID().toString();
     @NonNull
-    private String category; 
+    private String userId;
+
     @NonNull
-    private String name; 
+    private String category;
     @NonNull
-    private String period; 
+    private String name;
     @NonNull
-    private int limitAmount; 
-    
+    private String period;
+    @NonNull
+    private int limitAmount;
+
 }

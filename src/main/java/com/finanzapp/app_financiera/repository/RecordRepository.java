@@ -41,10 +41,11 @@ public class RecordRepository {
         return null;
     }
 
-    public List<Record> buscarPorFiltros(String buscador, String filtroFecha) {
+    public List<Record> buscarPorFiltros(String userId,String buscador, String filtroFecha) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         return tablaRegistros.values().stream()
+                .filter(e -> e.getUserId().equals(userId))
                 .filter(record -> buscador == null
                 || (record.getType().toLowerCase().contains(buscador.toLowerCase()))
                 || (record.getDescription() != null && record.getDescription().toLowerCase().contains(buscador.toLowerCase()))

@@ -23,13 +23,13 @@ public class SavingService {
     }
 
     public void initSavings(){
-        save(new Saving("123","Universidad",10000, 300000, "Emergencia"));
-        save(new Saving("123","Casa",1000, 2000, "Metas Personales"));
-        save(new Saving("123","Banco",200000, 500000, "Vivienda"));
-        save(new Saving("123","Universidad",10000, 300000, "Inversión"));
-        save(new Saving("123","Casa",1000, 2000, "Entretenimiento"));
-        save(new Saving("123","Banco",200000, 500000, "Viajes"));
-        save(new Saving("123","Universidad",10000, 300000, "Saving"));
+        save(new Saving("321","Universidad",10000, 300000, "Emergencia"));
+        save(new Saving("321","Casa",1000, 2000, "Metas Personales"));
+        save(new Saving("321","Banco",200000, 500000, "Vivienda"));
+        save(new Saving("321","Universidad",10000, 300000, "Inversión"));
+        save(new Saving("321","Casa",1000, 2000, "Entretenimiento"));
+        save(new Saving("321","Banco",200000, 500000, "Viajes"));
+        save(new Saving("321","Universidad",10000, 300000, "Saving"));
     }
 
     public List<Saving> findAllSavings(String userId) {

@@ -2,6 +2,7 @@ package com.finanzapp.app_financiera.services;
 
 import com.finanzapp.app_financiera.models.PlannedPayment;
 import com.finanzapp.app_financiera.repository.PlannedPaymentRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,10 @@ public class PlannedPaymentService {
     }
 
     // Inicialización de datos de ejemplo
+        @PostConstruct
     private void initSampleData() {
         save(new PlannedPayment(
+                "321",
                 "Gasto",
                 "Vivienda",
                 "Pintada de paredes",
@@ -32,6 +35,7 @@ public class PlannedPaymentService {
         ));
 
         save(new PlannedPayment(
+                "321",
                 "Gasto",
                 "Transporte",
                 "Pasaje de bus",
@@ -40,6 +44,7 @@ public class PlannedPaymentService {
         ));
 
         save(new PlannedPayment(
+                "321",
                 "Ingreso",
                 "Salario",
                 "Pago mensual",

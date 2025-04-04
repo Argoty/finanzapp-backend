@@ -12,17 +12,20 @@ import java.util.UUID;
 @Data
 @RequiredArgsConstructor
 public class PlannedPayment {
+
     private String id = UUID.randomUUID().toString();
     @NonNull
-    private String type;       
+    private String userId;
+
     @NonNull
-    private String category;   
+    private String type;
     @NonNull
-    private String name;   
+    private String category;
+    @NonNull
+    private String name;
 
 //    @NonNull
 //    private String frequency;
-
     @NonNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate; // Fecha de vencimiento o pago
@@ -44,4 +47,3 @@ public class PlannedPayment {
 //        this.amount = amount;
 //    }
 }
-

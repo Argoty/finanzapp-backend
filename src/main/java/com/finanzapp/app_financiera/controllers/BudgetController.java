@@ -45,14 +45,15 @@ public class BudgetController {
     // Busca presupuestos usando filtros de búsqueda y período
     @GetMapping("/buscar")
     public ResponseEntity<List<Budget>> buscarBudgets(
+            @PathVariable String userId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String period) {
-        List<Budget> budgets = budgetService.buscarPorFiltros(query, period);
+        List<Budget> budgets = budgetService.buscarPorFiltros(userId,query, period);
         return new ResponseEntity<>(budgets, HttpStatus.OK);
     }
-    @GetMapping("/status")
-    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus() {
-        List<BudgetStatusResponse> statusList = budgetService.getAllBudgetsStatus();
+    @GetMapping("/status/{userId}")
+    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus(@PathVariable String userId) {
+        List<BudgetStatusResponse> statusList = budgetService.getAllBudgetsStatus(userId);
         return ResponseEntity.ok(statusList);
     }
 }
