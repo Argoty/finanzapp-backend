@@ -1,5 +1,7 @@
 package com.finanzapp.app_financiera.controllers;
 
+import com.finanzapp.app_financiera.dtos.CategoryDTO;
+import com.finanzapp.app_financiera.dtos.MontoPeriodoDTO;
 import com.finanzapp.app_financiera.models.Record;
 import com.finanzapp.app_financiera.services.RecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,20 @@ public class RecordController {
             @RequestParam(required = false) String lastPeriod) {
         List<Record> records = recordService.buscarPorFiltros(query, lastPeriod);
         return new ResponseEntity<>(records, HttpStatus.OK);
+    }
+    
+    @GetMapping("/categories")
+    public ResponseEntity<List<CategoryDTO>> getTotalesPorCategory(
+            @RequestParam(required = false) String lastPeriod) {
+        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(lastPeriod);
+        return new ResponseEntity<>(totales, HttpStatus.OK);
+    }
+    
+    @GetMapping("/buckets")
+    public ResponseEntity<List<MontoPeriodoDTO>> getBucketsPorPeriodo(
+            @RequestParam String lastPeriod) {
+        List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(lastPeriod);
+        return new ResponseEntity<>(buckets, HttpStatus.OK);
     }
 }
 
