@@ -52,6 +52,7 @@ public class RecordRepository {
                 || String.valueOf(record.getAmount()).contains(buscador)
                 || record.getDate().format(formatter).contains(buscador)) // <- Busca por fecha u hora
                 .filter(record -> filtroFecha == null || cumpleFiltroFecha(record.getDate(), filtroFecha)) // <- Filtra por últimos registros
+                .sorted((r1, r2) -> r2.getDate().compareTo(r1.getDate())) // Ordena de más reciente a más antiguo
                 .collect(Collectors.toList());
     }
 
