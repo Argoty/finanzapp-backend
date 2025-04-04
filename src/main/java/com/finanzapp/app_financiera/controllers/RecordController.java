@@ -37,32 +37,35 @@ public class RecordController {
     }
 
     // Elimina un record por ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecord(@PathVariable String id) {
-        recordService.deleteById(id);
+    @DeleteMapping("/{id}/{userId}")
+    public ResponseEntity<Void> deleteRecord(@PathVariable String id, @PathVariable String userId) {
+        recordService.deleteById(id, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)\n    // Ejemplo de uso: /api/records/buscar?query=gasto&lastPeriod=12 semanas
-    @GetMapping
+    @GetMapping("/{userId}")
     public ResponseEntity<List<Record>> buscarRecords(
+            @PathVariable String userId,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String lastPeriod) {
-        List<Record> records = recordService.buscarPorFiltros(query, lastPeriod);
+        List<Record> records = recordService.buscarPorFiltros(userId, query, lastPeriod);
         return new ResponseEntity<>(records, HttpStatus.OK);
     }
     
-    @GetMapping("/categories")
+    @GetMapping("/categories/{userId}")
     public ResponseEntity<List<CategoryDTO>> getTotalesPorCategory(
+            @PathVariable String userId,
             @RequestParam(required = false) String lastPeriod) {
-        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(lastPeriod);
+        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(userId,lastPeriod);
         return new ResponseEntity<>(totales, HttpStatus.OK);
     }
     
-    @GetMapping("/buckets")
+    @GetMapping("/buckets/{userId}")
     public ResponseEntity<List<MontoPeriodoDTO>> getBucketsPorPeriodo(
+            @PathVariable String userId,
             @RequestParam String lastPeriod) {
-        List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(lastPeriod);
+        List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(userId, lastPeriod);
         return new ResponseEntity<>(buckets, HttpStatus.OK);
     }
 }
