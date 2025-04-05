@@ -5,7 +5,6 @@ import com.finanzapp.app_financiera.dtos.BudgetStatusResponse;
 import com.finanzapp.app_financiera.models.Record;
 import com.finanzapp.app_financiera.repository.BudgetRepository;
 import com.finanzapp.app_financiera.repository.RecordRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,6 @@ public class BudgetService {
         initSampleData();
     }
 
-    // Inicialización de datos de ejemplo
-    @PostConstruct
     private void initSampleData() {
         save(new Budget("321","Alimentación", "Comida y restaurantes", "Mensual", 200000));
         save(new Budget("321","Transporte", "Movilidad diaria", "Semanal", 25000));
@@ -54,10 +51,6 @@ public class BudgetService {
         return budget;
     }
 
-    public List<Budget> buscarPorFiltros(String userId, String query, String period) {
-        return budgetRepository.buscarPorFiltros(userId,query, period);
-    }
-
     public Budget update(String id, Budget budget) {
         findById(id); // Valida que exista
         budget.setId(id);
@@ -69,9 +62,9 @@ public class BudgetService {
         budgetRepository.deleteById(id);
     }
 
-    public List<BudgetStatusResponse> getAllBudgetsStatus(String userId) {
-    List<Budget> budgets = budgetRepository.findAll(userId);
-        LocalDate today = LocalDate.now();
+    public List<BudgetStatusResponse> getAllBudgetsStatus(String userId, String period) {
+    List<Budget> budgets = budgetRepository.findAll(userId, period);
+    LocalDate today = LocalDate.now();
     
     return budgets.stream().map(budget -> {
         LocalDate startDate = calculateStartDate(today, budget.getPeriod());
