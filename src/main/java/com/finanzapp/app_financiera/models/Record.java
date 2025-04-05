@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class Record {
 
     private String id = UUID.randomUUID().toString();
+    @NonNull private String userId;
     @NonNull
     private String type;
     @NonNull
@@ -24,7 +25,8 @@ public class Record {
     private String description;
     private int amount;
 
-    public Record(@NonNull String type, @NonNull LocalDateTime date, @NonNull String category, String description, int amount) {
+    public Record(@NonNull String userId, @NonNull String type, @NonNull LocalDateTime date, @NonNull String category, String description, int amount) {
+        this.userId = userId;
         this.type = type;
         this.date = date;
         this.category = category;

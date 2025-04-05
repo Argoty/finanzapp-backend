@@ -22,9 +22,11 @@ public class UserService {
 
         initSampleData();
     }
-
+    
     private void initSampleData() {
-        save(new User("pepe", "pepe", "pepe"));
+        User userDefault = new User("pepe", "pepe", "pepe");
+        userDefault.setId("321");
+        save(userDefault);
         save(new User("maría", "maria@example.com", "lol"));
         save(new User("carlos", "carlos@example.com", "err"));
     }
