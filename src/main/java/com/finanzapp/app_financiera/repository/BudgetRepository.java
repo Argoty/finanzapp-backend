@@ -20,11 +20,12 @@ public class BudgetRepository {
         return tablaPresupuestos.get(id);
     }
 
-    public List<Budget> findAll(String userId) {
+    public List<Budget> findAll(String userId, String period) {
         return tablaPresupuestos.values()
                 .stream()
                 .filter(e -> e.getUserId().equals(userId))
-                .collect(Collectors.toList()); // Convertimos el Stream en una lista
+                .filter(b -> period == null || b.getPeriod().equalsIgnoreCase(period))
+                .collect(Collectors.toList());
     }
 
     public void deleteById(String id) {
@@ -38,16 +39,4 @@ public class BudgetRepository {
         }
         return null;
     }
-
-    public List<Budget> buscarPorFiltros(String userId, String query, String period) {
-        return tablaPresupuestos.values().stream()
-                .filter(b -> b.getUserId().equals(userId))
-                .filter(b -> (query == null || query.isEmpty())
-                || b.getCategory().toLowerCase().contains(query.toLowerCase())
-                || b.getName().toLowerCase().contains(query.toLowerCase())
-                || String.valueOf(b.getLimitAmount()).contains(query))
-                .filter(b -> (period == null || period.isEmpty()) || b.getPeriod().equalsIgnoreCase(period))
-                .collect(Collectors.toList());
-    }
-
 }

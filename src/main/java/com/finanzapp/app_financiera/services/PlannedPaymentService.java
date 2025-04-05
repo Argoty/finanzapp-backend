@@ -23,7 +23,6 @@ public class PlannedPaymentService {
     }
 
     // Inicialización de datos de ejemplo
-        @PostConstruct
     private void initSampleData() {
         save(new PlannedPayment(
                 "321",
