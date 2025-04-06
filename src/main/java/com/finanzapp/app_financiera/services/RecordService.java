@@ -136,7 +136,7 @@ public class RecordService {
         }
 
         // Obtener los registros filtrados según el lastPeriod
-        // Reutilizamos el método buscarPorFiltros que ya tienes
+        // Reutilizamos el método buscarPorFiltros
         List<Record> records = recordRepository.buscarPorFiltros(userId, null, lastPeriod);
 
         return generarBuckets(records, startDate, endDate, binPeriod);
