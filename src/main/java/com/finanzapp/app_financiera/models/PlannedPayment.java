@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -29,6 +30,8 @@ public class PlannedPayment {
     @NonNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate; // Fecha de vencimiento o pago
+    
+    private LocalDate paymentDate;
 
     @NonNull
     private int amount;
