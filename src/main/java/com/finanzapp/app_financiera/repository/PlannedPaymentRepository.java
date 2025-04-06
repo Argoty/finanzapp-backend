@@ -48,7 +48,7 @@ public class PlannedPaymentRepository {
                         || p.getDueDate().format(formatter).contains(query)
                         || String.valueOf(p.getAmount()).contains(query))
                 
-                .sorted((p1, p2) -> p2.getDueDate().compareTo(p1.getDueDate()))
+                .sorted((p1, p2) -> p1.getDueDate().compareTo(p2.getDueDate()))
                 .collect(Collectors.toList());
     }
     private boolean cumpleFiltroFecha(LocalDate fecha, String futurePeriod) {
