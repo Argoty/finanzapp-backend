@@ -9,11 +9,10 @@ import java.util.UUID;
 
 @Data
 public class Debt {
-    private final String id = UUID.randomUUID().toString();
+    private String id = UUID.randomUUID().toString();
     @NonNull private String userId;
     @NonNull private String title;
     @NonNull private double accumulatedAmount ;
     @NonNull private double totalDebt;
     @NonNull private LocalDate date;
-
 }

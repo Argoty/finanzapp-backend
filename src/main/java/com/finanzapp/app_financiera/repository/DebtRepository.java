@@ -7,21 +7,30 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class DebtRepository {
     private final HashMap<String, Debt> tableDebts = new HashMap<>();
 
-    public List<Debt> findAllDebts() {
-        return new ArrayList<>(tableDebts.values());
+    public List<Debt> findAllDebts(String userId) {
+        return new ArrayList<>(tableDebts.values().stream()
+                .filter(e -> e.getUserId().equals(userId))
+                .collect(Collectors.toList()));
+    }
+    
+    public Debt findById(String id) {
+        return tableDebts.get(id);
     }
 
     public Debt save(Debt debt) {
-        return tableDebts.put(debt.getId(), debt);
+        tableDebts.put(debt.getId(), debt);
+        return debt;
     }
 
     public Debt remove(String id) {
         return tableDebts.remove(id);
     }
+    
 
 }
