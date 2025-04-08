@@ -2,6 +2,7 @@ package com.finanzapp.app_financiera.services;
 
 import com.finanzapp.app_financiera.models.Saving;
 import com.finanzapp.app_financiera.repository.SavingRepository;
+import com.finanzapp.app_financiera.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -15,37 +16,57 @@ import java.util.List;
 public class SavingService {
 
     private final SavingRepository savingRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public SavingService(SavingRepository savingRepository) {
+    public SavingService(SavingRepository savingRepository, UserRepository userRepository) {
         this.savingRepository = savingRepository;
+        this.userRepository = userRepository;
         initSavings();
     }
 
-    public void initSavings(){
-        save(new Saving("321","Universidad",10000, 300000, "Emergencia"));
-        save(new Saving("321","Casa",1000, 2000, "Metas Personales"));
-        save(new Saving("321","Banco",200000, 500000, "Vivienda"));
-        save(new Saving("321","Universidad",10000, 300000, "Inversión"));
-        save(new Saving("321","Casa",1000, 2000, "Entretenimiento"));
-        save(new Saving("321","Banco",200000, 500000, "Viajes"));
-        save(new Saving("321","Universidad",10000, 300000, "Saving"));
+    public void initSavings() {
+        save(new Saving("321", "Universidad", 10000, 300000, "Emergencia"));
+        save(new Saving("321", "Casa", 1000, 2000, "Metas Personales"));
+        save(new Saving("321", "Banco", 200000, 500000, "Vivienda"));
+        save(new Saving("321", "Universidad", 10000, 300000, "Inversión"));
+        save(new Saving("321", "Casa", 1000, 2000, "Entretenimiento"));
+        save(new Saving("321", "Banco", 200000, 500000, "Viajes"));
+        save(new Saving("321", "Universidad", 10000, 300000, "Saving"));
     }
 
     public List<Saving> findAllSavings(String userId) {
         return savingRepository.findAllSavings(userId);
     }
 
-
-
     public Saving save(Saving saving) {
         return savingRepository.save(saving);
     }
 
     public Saving deleteSavingById(String id) {
-        if(savingRepository.findSavingById(id) == null){
+        if (savingRepository.findSavingById(id) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontro este ahorro");
         }
         return savingRepository.remove(id);
+    }
+
+    public Saving updateSaving(Saving saving, String userId, String id) {
+        if (savingRepository.findSavingById(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontro este ahorro");
+        }
+        saving.setId(id);
+        return savingRepository.save(saving);
+    }
+
+    public Saving saveToSaving(String id, String userId, double amount) {
+        if (savingRepository.findSavingById(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ahorro no encontrado");
+        }
+        if (userRepository.findById(userId) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+        Saving saving = savingRepository.findSavingById(id);
+        saving.setAccumulatedAmount(amount + saving.getAccumulatedAmount()); // o el campo que uses
+        return saving;
     }
 }
