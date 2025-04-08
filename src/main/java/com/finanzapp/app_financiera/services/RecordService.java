@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,19 +35,19 @@ public class RecordService {
     private void initSampleData() {
         LocalDateTime now = LocalDateTime.now();
 
-        save(new Record("321","Gasto", now, "Transporte", "Pasaje de bus", 5000));
-        save(new Record("321","Gasto", now.minusDays(1), "Transporte", "Taxi", 7000));
-        save(new Record("321","Gasto", now.minusDays(3), "Alimentación", "Cena en restaurante", 45000));
-        save(new Record("321","Gasto", now.minusDays(5), "Alimentación", "Mercado", 30000));
-        save(new Record("321","Gasto", now.minusDays(10), "Tecnología", "Auriculares inalámbricos", 120000));
-        save(new Record("321","Gasto", now.minusDays(4), "Deportes y Fitness", "Membresía gimnasio", 80000));
+        save(new Record("321", "Gasto", now, "Transporte", "Pasaje de bus", 5000));
+        save(new Record("321", "Gasto", now.minusDays(1), "Transporte", "Taxi", 7000));
+        save(new Record("321", "Gasto", now.minusDays(3), "Alimentación", "Cena en restaurante", 45000));
+        save(new Record("321", "Gasto", now.minusDays(5), "Alimentación", "Mercado", 30000));
+        save(new Record("321", "Gasto", now.minusDays(10), "Tecnología", "Auriculares inalámbricos", 120000));
+        save(new Record("321", "Gasto", now.minusDays(4), "Deportes y Fitness", "Membresía gimnasio", 80000));
 
         // Datos de ingresos (no influyen en el estado del presupuesto, ya que se filtran solo "Gasto")
-        save(new Record("321","Ingreso", now.minusDays(15), "Salario", "Pago mensual", 3500000));
-        save(new Record("321","Ingreso", now.minusDays(12), "Freelance o trabajos extra", "Diseño web", 500000));
-        save(new Record("321","Ingreso", now.minusDays(8), "Inversiones", "Dividendos acciones", 250000));
-        save(new Record("321","Ingreso", now.minusDays(6), "Alquileres", "Renta apartamento", 1200000));
-        save(new Record("321","Ingreso", now.minusDays(2), "Regalos o bonos", "Bono por desempeño", 300000));
+        save(new Record("321", "Ingreso", now.minusDays(15), "Salario", "Pago mensual", 3500000));
+        save(new Record("321", "Ingreso", now.minusDays(12), "Freelance o trabajos extra", "Diseño web", 500000));
+        save(new Record("321", "Ingreso", now.minusDays(8), "Inversiones", "Dividendos acciones", 250000));
+        save(new Record("321", "Ingreso", now.minusDays(6), "Alquileres", "Renta apartamento", 1200000));
+        save(new Record("321", "Ingreso", now.minusDays(2), "Regalos o bonos", "Bono por desempeño", 300000));
     }
 
     // Agregar un record (aquí podrías validar el token/rol de admin si fuera necesario)
@@ -68,7 +70,7 @@ public class RecordService {
     }
 
     // Busca records usando un query de búsqueda y un filtro de tiempo (por ejemplo: \"1 semana\", \"1 mes\", etc.)
-    public List<Record> buscarPorFiltros(String userId,String query, String lastPeriod) {
+    public List<Record> buscarPorFiltros(String userId, String query, String lastPeriod) {
         return recordRepository.buscarPorFiltros(userId, query, lastPeriod);
     }
 
@@ -104,82 +106,96 @@ public class RecordService {
                 .collect(Collectors.toList());
     }
 
-    public List<MontoPeriodoDTO> obtenerBucketsPorPeriodo(String userId,String lastPeriod) {
-        LocalDateTime ahora = LocalDateTime.now();
-        LocalDate endDate = ahora.toLocalDate();
+    public List<MontoPeriodoDTO> obtenerBucketsPorPeriodo(String userId, String lastPeriod) {
+        LocalDate today = LocalDate.now();
         LocalDate startDate;
-        Period binPeriod;
+        int desiredBuckets;
 
         switch (lastPeriod.toLowerCase()) {
             case "1 semana":
-                startDate = ahora.minusWeeks(1).toLocalDate();
-                binPeriod = Period.ofDays(1); // buckets diarios
+                // Para 7 días (incluyendo hoy), el inicio es hoy menos 6 días.
+                startDate = today.minusDays(6);
+                desiredBuckets = 7;
                 break;
             case "1 mes":
-                startDate = ahora.minusMonths(1).toLocalDate();
-                binPeriod = Period.ofWeeks(1); // buckets semanales (aprox. 4 semanas)
+                // Para 1 mes, queremos 4 buckets (aproximadamente semanas).
+                startDate = today.minusMonths(1);
+                desiredBuckets = 4;
                 break;
             case "3 meses":
-                startDate = ahora.minusMonths(3).toLocalDate();
-                binPeriod = Period.ofDays(14); // buckets de 2 semanas
+                // Para 3 meses, usar 6 buckets (cada 2 semanas, aproximadamente).
+                startDate = today.minusMonths(3);
+                desiredBuckets = 6;
                 break;
             case "6 meses":
-                startDate = ahora.minusMonths(6).toLocalDate();
-                binPeriod = Period.ofMonths(1); // buckets mensuales
+                // Para 6 meses, usar 6 buckets (cada mes).
+                startDate = today.minusMonths(6);
+                desiredBuckets = 6;
                 break;
             case "1 año":
-                startDate = ahora.minusYears(1).toLocalDate();
-                binPeriod = Period.ofMonths(2); // buckets de 2 meses
+                // Para 1 año, usar 6 buckets (cada 2 meses).
+                startDate = today.minusYears(1);
+                desiredBuckets = 6;
                 break;
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Periodo no válido");
         }
 
         // Obtener los registros filtrados según el lastPeriod
-        // Reutilizamos el método buscarPorFiltros
         List<Record> records = recordRepository.buscarPorFiltros(userId, null, lastPeriod);
 
-        return generarBuckets(records, startDate, endDate, binPeriod);
+        return generarBuckets(records, startDate, today, desiredBuckets);
     }
 
-    private List<MontoPeriodoDTO> generarBuckets(List<Record> records, LocalDate startDate, LocalDate endDate, Period binPeriod) {
+    private List<MontoPeriodoDTO> generarBuckets(List<Record> records, LocalDate startDate, LocalDate endDate, int desiredBuckets) {
         List<MontoPeriodoDTO> resultado = new ArrayList<>();
-        LocalDate binStart = startDate;
 
-        while (binStart.isBefore(endDate)) {
-            final LocalDate currentBinStart = binStart;
-            LocalDate binEnd = binStart.plus(binPeriod);
+        // Total de días entre startDate y endDate (incluyendo ambos extremos)
+        long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
-            // Generar etiqueta para el bucket, puedes formatearla a tu gusto.
-            String etiqueta = currentBinStart.toString() + " - " + binEnd.minusDays(1).toString();
+        // Tamaño base de cada bucket
+        long baseBucketSize = totalDays / desiredBuckets;
+        // Resto que se reparte en los primeros buckets
+        long remainder = totalDays % desiredBuckets;
 
-            // Filtrar registros dentro del bucket
+        LocalDate current = startDate;
+        for (int i = 0; i < desiredBuckets; i++) {
+            // Cada bucket tendrá baseBucketSize días, y si i < remainder, se le suma 1 día extra
+            long currentBucketSize = baseBucketSize + (i < remainder ? 1 : 0);
+            LocalDate bucketEnd = current.plusDays(currentBucketSize);
+
+            // Asigna current a una variable final para usarla en la lambda
+            final LocalDate currentBucketStart = current;
+
+            // Generar etiqueta para el bucket: de currentBucketStart hasta bucketEnd - 1
+            String etiqueta = currentBucketStart.format(DateTimeFormatter.ISO_DATE)
+                    + " - " + bucketEnd.minusDays(1).format(DateTimeFormatter.ISO_DATE);
+
+            // Filtrar registros dentro del intervalo [currentBucketStart, bucketEnd)
             List<Record> registrosFiltrados = records.stream()
                     .filter(r -> {
                         LocalDate recordDate = r.getDate().toLocalDate();
-                        return !recordDate.isBefore(currentBinStart) && recordDate.isBefore(binEnd);
+                        return !recordDate.isBefore(currentBucketStart) && recordDate.isBefore(bucketEnd);
                     })
                     .collect(Collectors.toList());
 
-            // Sumar montos para ingresos
             int montoIngreso = registrosFiltrados.stream()
                     .filter(r -> r.getType().equalsIgnoreCase("Ingreso"))
                     .mapToInt(Record::getAmount)
                     .sum();
-
-            // Sumar montos para gastos
             int montoGasto = registrosFiltrados.stream()
                     .filter(r -> r.getType().equalsIgnoreCase("Gasto"))
                     .mapToInt(Record::getAmount)
                     .sum();
 
             resultado.add(new MontoPeriodoDTO(etiqueta, montoIngreso, "Ingreso"));
-
             resultado.add(new MontoPeriodoDTO(etiqueta, montoGasto, "Gasto"));
 
-            binStart = binEnd;
+            // Actualizar current para el siguiente bucket
+            current = bucketEnd;
         }
 
         return resultado;
     }
+
 }
