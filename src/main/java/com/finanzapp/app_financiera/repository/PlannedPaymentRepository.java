@@ -42,31 +42,37 @@ public class PlannedPaymentRepository {
                 .filter(p -> p.getPaymentDate() == null)
                 .filter(p -> futurePeriod == null || cumpleFiltroFecha(p.getDueDate(), futurePeriod)) // <- Filtra por últimos registros
                 .filter(p -> (query == null || query.isEmpty())
-                        || p.getType().toLowerCase().contains(query.toLowerCase())
-                        || p.getCategory().toLowerCase().contains(query.toLowerCase())
-                        || p.getName().toLowerCase().contains(query.toLowerCase())
-                        || p.getDueDate().format(formatter).contains(query)
-                        || String.valueOf(p.getAmount()).contains(query))
-                
+                || p.getType().toLowerCase().contains(query.toLowerCase())
+                || p.getCategory().toLowerCase().contains(query.toLowerCase())
+                || p.getName().toLowerCase().contains(query.toLowerCase())
+                || p.getDueDate().format(formatter).contains(query)
+                || String.valueOf(p.getAmount()).contains(query))
                 .sorted((p1, p2) -> p1.getDueDate().compareTo(p2.getDueDate()))
                 .collect(Collectors.toList());
     }
+
     private boolean cumpleFiltroFecha(LocalDate fecha, String futurePeriod) {
-        LocalDate ahora = LocalDate.now();
+        LocalDate hoy = LocalDate.now();
         LocalDate fechaLimite = switch (futurePeriod.toLowerCase()) {
             case "1 semana" ->
-                ahora.plusWeeks(1);
+                hoy.plusWeeks(1);
             case "1 mes" ->
-                ahora.plusMonths(1);
+                hoy.plusMonths(1);
             case "3 meses" ->
-                ahora.plusWeeks(12);
+                hoy.plusWeeks(12);
             case "6 meses" ->
-                ahora.plusMonths(6);
+                hoy.plusMonths(6);
             case "1 año" ->
-                ahora.plusYears(1);
+                hoy.plusYears(1);
             default ->
                 null;
         };
-        return fechaLimite == null || fecha.isBefore(fechaLimite);
+        // Si no hay filtro, se permite cualquier fecha
+        if (fechaLimite == null) {
+            return true;
+        }
+        // Aceptar desde el pasado hasta la fecha límite (inclusive)
+        return !fecha.isAfter(fechaLimite); // fecha <= fechaLimite
     }
+
 }

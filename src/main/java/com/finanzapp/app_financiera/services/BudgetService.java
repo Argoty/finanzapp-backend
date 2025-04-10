@@ -77,7 +77,7 @@ public class BudgetService {
 
         int totalSpent = expenseRecords.stream().mapToInt(Record::getAmount).sum();
 
-        return new BudgetStatusResponse(budget, totalSpent);
+        return new BudgetStatusResponse(budget, totalSpent, startDate);
     }).collect(Collectors.toList());
 }
 
