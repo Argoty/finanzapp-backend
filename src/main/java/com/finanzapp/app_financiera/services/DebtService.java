@@ -26,7 +26,16 @@ public class DebtService {
     }
 
     public void initDebts() {
-        save(new Debt("321", "pepe", 0, 10, LocalDate.of(2025, 6, 2)));
+        save(new Debt("321", "Casa", 0, 10, LocalDate.of(2025, 6, 2)));
+        save(new Debt("321", "Auto", 500, 5000, LocalDate.now().plusDays(7)));
+        save(new Debt("321", "Crédito personal", 200, 2000, LocalDate.now().plusDays(20)));
+        save(new Debt("321", "Estudios", 0, 10000, LocalDate.now().plusDays(29)));
+        save(new Debt("321", "Vacaciones", 300, 3000, LocalDate.now().plusDays(14)));
+        save(new Debt("321", "Muebles", 150, 1500, LocalDate.now().plusDays(2)));
+        save(new Debt("321", "Electrodomésticos", 100, 1200, LocalDate.now().plusDays(12)));
+        save(new Debt("321", "Médico", 0, 2500, LocalDate.now().plusDays(5)));
+        save(new Debt("321", "Reparaciones", 400, 4000, LocalDate.now().plusDays(27)));
+        save(new Debt("321", "Negocio", 1000, 15000, LocalDate.now().minusDays(10)));
     }
 
     public List<Debt> findAllDebts(String userId) {
