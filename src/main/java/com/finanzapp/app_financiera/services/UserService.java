@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -19,16 +20,13 @@ public class UserService {
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-
         initSampleData();
     }
     
     private void initSampleData() {
-        User userDefault = new User("pepe", "pepe", "pepe");
-        userDefault.setId("321");
-        save(userDefault);
-        save(new User("maría", "maria@example.com", "lol"));
-        save(new User("carlos", "carlos@example.com", "err"));
+        /*save(new User("321","pepe", "pepe", "pepe"));
+        save(new User("1","maría", "maria@example.com", "lol"));
+        save(new User("2","carlos", "carlos@example.com", "err"));*/
     }
 
     public User save(User user) {
@@ -36,7 +34,9 @@ public class UserService {
     }
 
     public User findById(String id) {
-        return userRepository.findById(id);
+        Optional<User> user = userRepository.findById(id);
+        user.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE USUARIO NO ESTA REGISTRADO"));
+        return user.get();
     }
 
     public List<UserDTO> findAll() {
@@ -48,7 +48,10 @@ public class UserService {
     }
 
     public User update(User user) {
-        return userRepository.update(user);
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE USUARIO NO ESTA REGISTRADO"));
+        userRepository.save(user);
+        return user;
     }
 
     public void deleteById(String id) {
@@ -56,21 +59,20 @@ public class UserService {
     }
 
     public UserDTO loginUser(String email, String password) {
-        User user = userRepository.findByEmail(email);
-        if(user != null && user.getPassword().equals(password)){
-            return new UserDTO(user);
-        }
-        if(user != null){
+        Optional<User> user = userRepository.findByEmail(email);
+        user.orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE USUARIO NO ESTA REGISTRADO"));
+
+        if(!user.get().getPassword().equals(password)){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE USUARIO NO ESTA REGISTRADO");
+        return new UserDTO(user.get());
     }
 
     public UserDTO signUpUser(User user) {
         if(!user.getEmail().contains("@")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "EL CORREO DEBE SER VALIDO");
         }
-        if(userRepository.findByEmail(user.getEmail()) != null){
+        if(userRepository.findByEmail(user.getEmail()).isPresent()){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ESTE CORREO YA ESTA REGISTRADO");
         }
         if(user.getPassword().length() < 8){
@@ -84,12 +86,11 @@ public class UserService {
     }
 
     public ResponseMessage recoverAccount(String email) {
-        User user = userRepository.findByEmail(email);
-        if(user == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE CORREO NO ESTA REGISTRADO");
-        }
-        EmailService.enviarCorreo("RECUPERACION DE CUENTA PARA: " + user.getUsername(),
-                "EMAIL: " + email + "\nCONTRASEÑA: " + user.getPassword());
+        Optional<User> user = userRepository.findByEmail(email);
+        user.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE CORREO NO ESTA REGISTRADO"));
+
+        EmailService.enviarCorreo("RECUPERACION DE CUENTA PARA: " + user.get().getUsername(),
+                "EMAIL: " + email + "\nCONTRASEÑA: " + user.get().getPassword());
 
         return new ResponseMessage("Se envio un correo de recuperación");
     }
