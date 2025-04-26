@@ -34,8 +34,8 @@ public class SavingController {
     @PutMapping("/{userId}/{id}")
     public ResponseEntity<Saving> updateSaving(
             @Parameter(description = "Cuerpo del ahorro") @RequestBody Saving saving,
-            @Parameter(description = "ID del usuario", required = true) @PathVariable String userId,
-            @Parameter(description = "ID del ahorro", required = true) @PathVariable String id) {
+            @Parameter(description = "ID del usuario", required = true) @PathVariable int userId,
+            @Parameter(description = "ID del ahorro", required = true) @PathVariable int id) {
 
         return ResponseEntity.ok(savingService.updateSaving(saving, userId, id));
     }
@@ -48,7 +48,7 @@ public class SavingController {
     @GetMapping("/{userId}")
     public ResponseEntity<List<Saving>> findAllSavings(
             @Parameter(description = "ID del usuario", required = true)
-            @PathVariable String userId) {
+            @PathVariable int userId) {
         return ResponseEntity.ok(savingService.findAllSavings(userId));
     }
 
@@ -72,7 +72,7 @@ public class SavingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Saving> deleteSaving(
             @Parameter(description = "ID del ahorro a eliminar", required = true)
-            @PathVariable String id) {
+            @PathVariable int id) {
         return ResponseEntity.ok(savingService.deleteSavingById(id));
     }
 
@@ -85,9 +85,9 @@ public class SavingController {
     @PatchMapping("/{userId}/{savingId}/ahorrar")
     public ResponseEntity<Saving> ahorrar(
             @Parameter(description = "ID del usuario", required = true)
-            @PathVariable String userId,
+            @PathVariable int userId,
             @Parameter(description = "ID del ahorro", required = true)
-            @PathVariable String savingId,
+            @PathVariable int savingId,
             @Parameter(description = "Monto a ahorrar", required = true, example = "200.0")
             @RequestParam("amount") double amount) {
         return ResponseEntity.ok(savingService.saveToSaving(savingId, userId, amount));

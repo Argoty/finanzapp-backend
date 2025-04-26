@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SavingRepository extends JpaRepository<Saving, String> {
-    List<Saving> findAllByUserId(String userId);
+public interface SavingRepository extends JpaRepository<Saving, Integer> {
+    List<Saving> findAllByUserId(int userId);
 }

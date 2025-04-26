@@ -1,8 +1,6 @@
 package com.finanzapp.app_financiera.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
@@ -12,12 +10,14 @@ import java.util.UUID;
 @Table(name = "savings")
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Saving {
     @Id
-    private String id = UUID.randomUUID().toString();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     @NonNull
-    private String userId;
+    private int userId;
 
     @NonNull
     private String title;

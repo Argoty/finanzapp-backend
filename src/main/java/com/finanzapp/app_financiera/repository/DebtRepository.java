@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DebtRepository extends JpaRepository<Debt, String> {
+public interface DebtRepository extends JpaRepository<Debt, Integer> {
     
-    List<Debt> findAllByUserId(String userId);
+    List<Debt> findAllByUserId(int userId);
 
-    void deleteById(String id);
+    void deleteById(int id);
 }

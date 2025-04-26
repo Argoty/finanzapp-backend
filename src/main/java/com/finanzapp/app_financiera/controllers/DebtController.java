@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class DebtController {
 
     private final DebtService debtService;
 
+    @Autowired
     public DebtController(DebtService debtService) {
         this.debtService = debtService;
     }
@@ -33,8 +35,8 @@ public class DebtController {
     @PutMapping("/{userId}/{id}")
     public ResponseEntity<Debt> updateDebt(
             @Parameter(description = "Cuerpo de la deuda") @RequestBody Debt debt,
-            @Parameter(description = "ID del usuario", required = true) @PathVariable String userId,
-            @Parameter(description = "ID de la deuda", required = true) @PathVariable String id) {
+            @Parameter(description = "ID del usuario", required = true) @PathVariable int userId,
+            @Parameter(description = "ID de la deuda", required = true) @PathVariable int id) {
 
         return ResponseEntity.ok(debtService.updateDebt(debt, userId, id));
     }
@@ -47,7 +49,7 @@ public class DebtController {
     @GetMapping("/{userId}")
     public ResponseEntity<List<Debt>> findAllDebts(
             @Parameter(description = "ID del usuario", required = true)
-            @PathVariable String userId) {
+            @PathVariable int userId) {
         return ResponseEntity.ok(debtService.findAllDebts(userId));
     }
 
@@ -70,7 +72,7 @@ public class DebtController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Debt> deleteDebt(
             @Parameter(description = "ID de la deuda a eliminar", required = true)
-            @PathVariable String id) {
+            @PathVariable int id) {
         return ResponseEntity.ok(debtService.deleteDebtById(id));
     }
 
@@ -83,9 +85,9 @@ public class DebtController {
     @PatchMapping("/{userId}/{debtId}/abonar")
     public ResponseEntity<Debt> abonarDeuda(
             @Parameter(description = "ID del usuario", required = true)
-            @PathVariable String userId,
+            @PathVariable int userId,
             @Parameter(description = "ID de la deuda", required = true)
-            @PathVariable String debtId,
+            @PathVariable int debtId,
             @Parameter(description = "Monto a abonar", required = true, example = "150.0")
             @RequestParam("amount") double amount) {
         return ResponseEntity.ok(debtService.payDebt(debtId, userId, amount));
