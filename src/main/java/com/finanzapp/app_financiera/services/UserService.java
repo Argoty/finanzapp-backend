@@ -24,16 +24,16 @@ public class UserService {
     }
     
     private void initSampleData() {
-        /*save(new User("321","pepe", "pepe", "pepe"));
-        save(new User("1","maría", "maria@example.com", "lol"));
-        save(new User("2","carlos", "carlos@example.com", "err"));*/
+        /*save(new User("pepe", "pepe", "pepe"));
+        save(new User("maría", "maria@example.com", "lol"));
+        save(new User("carlos", "carlos@example.com", "err"));*/
     }
 
     public User save(User user) {
         return userRepository.save(user);
     }
 
-    public User findById(String id) {
+    public User findById(int id) {
         Optional<User> user = userRepository.findById(id);
         user.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE USUARIO NO ESTA REGISTRADO"));
         return user.get();
@@ -54,7 +54,7 @@ public class UserService {
         return user;
     }
 
-    public void deleteById(String id) {
+    public void deleteById(int id) {
         userRepository.deleteById(id);
     }
 
