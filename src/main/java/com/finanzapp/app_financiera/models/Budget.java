@@ -1,17 +1,27 @@
 package com.finanzapp.app_financiera.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Data
+@Entity
+@Table(name = "budgets")
 @RequiredArgsConstructor
+@NoArgsConstructor  
 public class Budget {
 
-    private String id = UUID.randomUUID().toString();
-    @NonNull
-    private String userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    
+    @NonNull private int userId;
 
     @NonNull
     private String category;

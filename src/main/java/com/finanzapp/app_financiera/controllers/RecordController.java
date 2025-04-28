@@ -36,7 +36,7 @@ public class RecordController {
             @ApiResponse(responseCode = "400", description = "Datos de registro inválidos")
     })
     public ResponseEntity<Record> createRecord(@RequestBody @Parameter(description = "Datos del registro a crear") Record record) {
-        Record newRecord = recordService.agregarRecord(record);
+        Record newRecord = recordService.save(record);
         return new ResponseEntity<>(newRecord, HttpStatus.CREATED);
     }
 
@@ -48,7 +48,9 @@ public class RecordController {
             @ApiResponse(responseCode = "404", description = "Registro no encontrado"),
             @ApiResponse(responseCode = "400", description = "Datos de registro inválidos")
     })
-    public ResponseEntity<Record> updateRecord(@PathVariable @Parameter(description = "ID del registro a actualizar") String id, @RequestBody @Parameter(description = "Nuevos datos del registro") Record record) {
+    public ResponseEntity<Record> updateRecord(
+            @PathVariable @Parameter(description = "ID del registro a actualizar") int id,
+            @RequestBody @Parameter(description = "Nuevos datos del registro") Record record) {
         Record updatedRecord = recordService.update(id, record);
         return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
     }
@@ -60,20 +62,21 @@ public class RecordController {
             @ApiResponse(responseCode = "204", description = "Registro eliminado con éxito"),
             @ApiResponse(responseCode = "404", description = "Registro no encontrado o el usuario no es el propietario")
     })
-    public ResponseEntity<Void> deleteRecord(@PathVariable @Parameter(description = "ID del registro a eliminar") String id, @PathVariable @Parameter(description = "ID del usuario que creó el registro") String userId) {
+    public ResponseEntity<Void> deleteRecord(
+            @PathVariable @Parameter(description = "ID del registro a eliminar") int id,
+            @PathVariable @Parameter(description = "ID del usuario que creó el registro") int userId) {
         recordService.deleteById(id, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)
-    // Ejemplo de uso: /api/records/buscar?query=gasto&lastPeriod=12 semanas
     @GetMapping("/{userId}")
     @Operation(summary = "Buscar registros por usuario y filtros", description = "Busca registros financieros para un usuario específico, permitiendo filtrar por una consulta general y un período de tiempo.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de registros encontrados")
     })
     public ResponseEntity<List<Record>> buscarRecords(
-            @PathVariable @Parameter(description = "ID del usuario para buscar registros") String userId,
+            @PathVariable @Parameter(description = "ID del usuario para buscar registros") int userId,
             @RequestParam(required = false) @Parameter(description = "Término de búsqueda general (opcional)") String query,
             @RequestParam(required = false) @Parameter(description = "Filtro de período reciente (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año') (opcional)") String lastPeriod) {
         List<Record> records = recordService.buscarPorFiltros(userId, query, lastPeriod);
@@ -86,9 +89,9 @@ public class RecordController {
             @ApiResponse(responseCode = "200", description = "Lista de totales por categoría")
     })
     public ResponseEntity<List<CategoryDTO>> getTotalesPorCategory(
-            @PathVariable @Parameter(description = "ID del usuario para obtener los totales") String userId,
+            @PathVariable @Parameter(description = "ID del usuario para obtener los totales") int userId,
             @RequestParam(required = false) @Parameter(description = "Filtro de período (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año') (opcional)") String lastPeriod) {
-        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(userId,lastPeriod);
+        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(userId, lastPeriod);
         return new ResponseEntity<>(totales, HttpStatus.OK);
     }
 
@@ -99,10 +102,11 @@ public class RecordController {
             @ApiResponse(responseCode = "400", description = "Formato de período no válido")
     })
     public ResponseEntity<List<MontoPeriodoDTO>> getBucketsPorPeriodo(
-            @PathVariable @Parameter(description = "ID del usuario para obtener los buckets") String userId,
+            @PathVariable @Parameter(description = "ID del usuario para obtener los buckets") int userId,
             @RequestParam @Parameter(description = "Período para agrupar los buckets (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año')") String lastPeriod) {
         List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(userId, lastPeriod);
         return new ResponseEntity<>(buckets, HttpStatus.OK);
     }
 }
+
 

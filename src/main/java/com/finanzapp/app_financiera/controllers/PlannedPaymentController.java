@@ -34,7 +34,7 @@ public class PlannedPaymentController {
         @ApiResponse(responseCode = "400", description = "Datos del pago planeado inválidos")
     })
     public ResponseEntity<PlannedPayment> createPago(@RequestBody @Parameter(description = "Datos del pago planeado a crear") PlannedPayment pago) {
-        PlannedPayment newPago = pagoService.agregarPago(pago);
+        PlannedPayment newPago = pagoService.save(pago);
         return new ResponseEntity<>(newPago, HttpStatus.CREATED);
     }
 
@@ -46,7 +46,7 @@ public class PlannedPaymentController {
         @ApiResponse(responseCode = "404", description = "Pago planeado no encontrado"),
         @ApiResponse(responseCode = "400", description = "Datos del pago planeado inválidos")
     })
-    public ResponseEntity<PlannedPayment> updatePago(@PathVariable @Parameter(description = "ID del pago planeado a actualizar") String id, @RequestBody @Parameter(description = "Nuevos datos del pago planeado") PlannedPayment pago) {
+    public ResponseEntity<PlannedPayment> updatePago(@PathVariable @Parameter(description = "ID del pago planeado a actualizar") int id, @RequestBody @Parameter(description = "Nuevos datos del pago planeado") PlannedPayment pago) {
         PlannedPayment updatedPago = pagoService.update(id, pago);
         return new ResponseEntity<>(updatedPago, HttpStatus.OK);
     }
@@ -58,7 +58,7 @@ public class PlannedPaymentController {
         @ApiResponse(responseCode = "204", description = "Pago planeado eliminado con éxito"),
         @ApiResponse(responseCode = "404", description = "Pago planeado no encontrado")
     })
-    public ResponseEntity<Void> deletePago(@PathVariable @Parameter(description = "ID del pago planeado a eliminar") String id) {
+    public ResponseEntity<Void> deletePago(@PathVariable @Parameter(description = "ID del pago planeado a eliminar") int id) {
         pagoService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -70,7 +70,7 @@ public class PlannedPaymentController {
         @ApiResponse(responseCode = "200", description = "Lista de pagos planeados encontrados")
     })
     public ResponseEntity<List<PlannedPayment>> buscarPagos(
-            @PathVariable @Parameter(description = "ID del usuario para buscar pagos planeados") String userId,
+            @PathVariable @Parameter(description = "ID del usuario para buscar pagos planeados") int userId,
             @RequestParam(required = false) @Parameter(description = "Texto para filtrar los pagos planeados por tipo, categoría, nombre, fecha de vencimiento o monto (opcional)") String query,
             @RequestParam(required = false) @Parameter(description = "Período futuro para filtrar los pagos planeados (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año') (opcional)") String futurePeriod) {
         List<PlannedPayment> pagos = pagoService.buscarPorFiltros(userId, query, futurePeriod);
@@ -85,7 +85,7 @@ public class PlannedPaymentController {
         @ApiResponse(responseCode = "404", description = "Pago planeado no encontrado"),
         @ApiResponse(responseCode = "409", description = "El pago planeado ya ha sido confirmado")
     })
-    public ResponseEntity<PlannedPayment> confirmarPago(@PathVariable @Parameter(description = "ID del pago planeado a confirmar") String id) {
+    public ResponseEntity<PlannedPayment> confirmarPago(@PathVariable @Parameter(description = "ID del pago planeado a confirmar") int id) {
         PlannedPayment pagoConfirmado = pagoService.confirmarPago(id);
         return new ResponseEntity<>(pagoConfirmado, HttpStatus.OK);
     }

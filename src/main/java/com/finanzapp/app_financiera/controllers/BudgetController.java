@@ -47,7 +47,7 @@ public class BudgetController {
         @ApiResponse(responseCode = "404", description = "Presupuesto no encontrado"),
         @ApiResponse(responseCode = "400", description = "Datos de presupuesto inválidos")
     })
-    public ResponseEntity<Budget> updateBudget(@PathVariable @Parameter(description = "ID del presupuesto a actualizar") String id, @RequestBody @Parameter(description = "Nuevos datos del presupuesto") Budget budget) {
+    public ResponseEntity<Budget> updateBudget(@PathVariable @Parameter(description = "ID del presupuesto a actualizar") int id, @RequestBody @Parameter(description = "Nuevos datos del presupuesto") Budget budget) {
         Budget updatedBudget = budgetService.update(id, budget);
         return new ResponseEntity<>(updatedBudget, HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class BudgetController {
         @ApiResponse(responseCode = "204", description = "Presupuesto eliminado con éxito"),
         @ApiResponse(responseCode = "404", description = "Presupuesto no encontrado")
     })
-    public ResponseEntity<Void> deleteBudget(@PathVariable @Parameter(description = "ID del presupuesto a eliminar") String id) {
+    public ResponseEntity<Void> deleteBudget(@PathVariable @Parameter(description = "ID del presupuesto a eliminar") int id) {
         budgetService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -69,7 +69,7 @@ public class BudgetController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista del estado de los presupuestos")
     })
-    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus(@PathVariable @Parameter(description = "ID del usuario para obtener el estado de los presupuestos") String userId, 
+    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus(@PathVariable @Parameter(description = "ID del usuario para obtener el estado de los presupuestos") int userId, 
             @RequestParam(required = false) @Parameter(description = "Período para filtrar los presupuestos (ej: 'semanal', 'mensual', 'trimestral', 'semestral', 'anual') (opcional)") String period) {
         List<BudgetStatusResponse> statusList = budgetService.getAllBudgetsStatus(userId, period);
         return ResponseEntity.ok(statusList);
