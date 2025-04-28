@@ -61,14 +61,18 @@ public class BudgetService {
     }
 
     public List<BudgetStatusResponse> getAllBudgetsStatus(int userId, String period) {
+        // Obtiene todos los presupuestos del usuario, filtrando por periodo si se indica
         List<Budget> budgets = (period == null)
                 ? budgetRepository.findAllByUserId(userId)
                 : budgetRepository.findAllByUserIdAndPeriod(userId, period);
 
+        // Procesa cada presupuesto para calcular su estado
         return budgets.stream()
                 .map(budget -> {
+                    // Calcula la fecha de inicio del presupuesto basado en su periodo
                     LocalDate startDate = calculateStartDate(LocalDate.now(), budget.getPeriod());
 
+                    // Obtiene los registros de gastos para la categoría desde la fecha de inicio
                     List<Record> expenseRecords = recordRepository
                             .findAllByUserIdAndTypeAndCategoryAndDateGreaterThanEqual(
                                     userId,
@@ -77,10 +81,12 @@ public class BudgetService {
                                     startDate.atStartOfDay()
                             );
 
+                    // Suma el total gastado en el periodo
                     int totalSpent = expenseRecords.stream()
                             .mapToInt(Record::getAmount)
                             .sum();
 
+                    // Retorna el estado del presupuesto con los datos calculados
                     return new BudgetStatusResponse(budget, totalSpent, startDate);
                 })
                 .collect(Collectors.toList());

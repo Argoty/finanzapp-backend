@@ -37,9 +37,8 @@ public class PlannedPaymentService {
     }
 
     public List<PlannedPayment> buscarPorFiltros(int userId, String query, String futurePeriod) {
-        LocalDate dueDateLimit = calcularFechaLimite(futurePeriod);
-        // Delegamos búsqueda y filtrado completo al repositorio
-        return pagoRepository.findByUserIdAndFilters(userId, dueDateLimit, query);
+        LocalDate limitDate = calcularFechaLimite(futurePeriod);
+        return pagoRepository.findByUserIdAndFilters(userId, limitDate, query);
     }
 
     public PlannedPayment update(int id, PlannedPayment pago) {
