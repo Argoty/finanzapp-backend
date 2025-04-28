@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BudgetService {
@@ -29,10 +29,10 @@ public class BudgetService {
     }
 
     private void initSampleData() {
-        save(new Budget("321","Alimentación", "Comida y restaurantes", "Mensual", 200000));
-        save(new Budget("321","Transporte", "Movilidad diaria", "Semanal", 25000));
-        save(new Budget("321","Tecnología", "Accesorios y dispositivos", "Trimestral", 500000));
-        save(new Budget("321","Deportes y Fitness", "Entrenamiento y gimnasio", "Mensual", 150000));
+//        save(new Budget(1, "Alimentación", "Comida y restaurantes", "Mensual", 200000));
+//        save(new Budget(1, "Transporte", "Movilidad diaria", "Semanal", 25000));
+//        save(new Budget(1, "Tecnología", "Accesorios y dispositivos", "Trimestral", 500000));
+//        save(new Budget(1, "Deportes y Fitness", "Entrenamiento y gimnasio", "Mensual", 150000));
     }
 
     public Budget save(Budget budget) {
@@ -43,60 +43,69 @@ public class BudgetService {
         return save(budget);
     }
 
-    public Budget findById(String id) {
-        Budget budget = budgetRepository.findById(id);
-        if (budget == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Presupuesto con ID " + id + " no encontrado");
-        }
-        return budget;
+    public Budget findById(int id) {
+        return budgetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Presupuesto con ID " + id + " no encontrado"));
     }
 
-    public Budget update(String id, Budget budget) {
-        findById(id); // Valida que exista
-        budget.setId(id);
-        return budgetRepository.update(budget);
-    }
-
-    public void deleteById(String id) {
+    public Budget update(int id, Budget budget) {
         findById(id);
-        budgetRepository.deleteById(id);
+
+        budget.setId(id);
+        return budgetRepository.save(budget);
     }
 
-    public List<BudgetStatusResponse> getAllBudgetsStatus(String userId, String period) {
-    List<Budget> budgets = budgetRepository.findAll(userId, period);
-    LocalDate today = LocalDate.now();
-    
-    return budgets.stream().map(budget -> {
-        LocalDate startDate = calculateStartDate(today, budget.getPeriod());
+    public void deleteById(int id) {
+        Budget budget = findById(id);
+        budgetRepository.delete(budget);
+    }
 
-        List<Record> expenseRecords = recordRepository.findAll().stream()
-                .filter(record -> record.getCategory().equalsIgnoreCase(budget.getCategory()))
-                .filter(record -> "Gasto".equalsIgnoreCase(record.getType()))
-                .filter(record -> !record.getDate().toLocalDate().isBefore(startDate))
+    public List<BudgetStatusResponse> getAllBudgetsStatus(int userId, String period) {
+        // Obtiene todos los presupuestos del usuario, filtrando por periodo si se indica
+        List<Budget> budgets = (period == null)
+                ? budgetRepository.findAllByUserId(userId)
+                : budgetRepository.findAllByUserIdAndPeriod(userId, period);
+
+        // Procesa cada presupuesto para calcular su estado
+        return budgets.stream()
+                .map(budget -> {
+                    // Calcula la fecha de inicio del presupuesto basado en su periodo
+                    LocalDate startDate = calculateStartDate(LocalDate.now(), budget.getPeriod());
+
+                    // Obtiene los registros de gastos para la categoría desde la fecha de inicio
+                    List<Record> expenseRecords = recordRepository
+                            .findAllByUserIdAndTypeAndCategoryAndDateGreaterThanEqual(
+                                    userId,
+                                    "Gasto",
+                                    budget.getCategory(),
+                                    startDate.atStartOfDay()
+                            );
+
+                    // Suma el total gastado en el periodo
+                    int totalSpent = expenseRecords.stream()
+                            .mapToInt(Record::getAmount)
+                            .sum();
+
+                    // Retorna el estado del presupuesto con los datos calculados
+                    return new BudgetStatusResponse(budget, totalSpent, startDate);
+                })
                 .collect(Collectors.toList());
+    }
 
-        int totalSpent = expenseRecords.stream().mapToInt(Record::getAmount).sum();
-
-        return new BudgetStatusResponse(budget, totalSpent, startDate);
-    }).collect(Collectors.toList());
-}
-
-private LocalDate calculateStartDate(LocalDate today, String period) {
-    switch (period.toLowerCase()) {
-        case "semanal":
-            return today.with(java.time.DayOfWeek.MONDAY);
-        case "mensual":
-            return today.withDayOfMonth(1);
-        case "trimestral":
-            return today.withMonth(((today.getMonthValue() - 1) / 3) * 3 + 1).withDayOfMonth(1);
-        case "semestral":
-            return today.withMonth((today.getMonthValue() <= 6) ? 1 : 7).withDayOfMonth(1);
-        case "anual":
-            return today.with(TemporalAdjusters.firstDayOfYear());
-        default:
-            throw new IllegalArgumentException("Período no válido: " + period);
+    private LocalDate calculateStartDate(LocalDate today, String period) {
+        switch (period.toLowerCase()) {
+            case "semanal":
+                return today.with(java.time.DayOfWeek.MONDAY);
+            case "mensual":
+                return today.withDayOfMonth(1);
+            case "trimestral":
+                return today.withMonth(((today.getMonthValue() - 1) / 3) * 3 + 1).withDayOfMonth(1);
+            case "semestral":
+                return today.withMonth((today.getMonthValue() <= 6) ? 1 : 7).withDayOfMonth(1);
+            case "anual":
+                return today.with(TemporalAdjusters.firstDayOfYear());
+            default:
+                throw new IllegalArgumentException("Período no válido: " + period);
+        }
     }
 }
-
-}
-

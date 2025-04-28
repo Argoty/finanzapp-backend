@@ -20,85 +20,64 @@ public class PlannedPaymentService {
     private final RecordRepository recordRepository;
 
     @Autowired
-    public PlannedPaymentService(PlannedPaymentRepository pagoRepository, RecordRepository recordRepository) {
+    public PlannedPaymentService(PlannedPaymentRepository pagoRepository,
+                                 RecordRepository recordRepository) {
         this.pagoRepository = pagoRepository;
         this.recordRepository = recordRepository;
-        initSampleData();
-    }
-
-    // Inicialización de datos de ejemplo
-    private void initSampleData() {
-         LocalDate now = LocalDate.now();
-        save(new PlannedPayment(
-                "321",
-                "Gasto",
-                "Vivienda",
-                "Pintada de paredes",
-                now.plusDays(1),
-                100000
-        ));
-
-        save(new PlannedPayment(
-                "321",
-                "Gasto",
-                "Transporte",
-                "Pasaje de bus",
-                now.plusDays(5),
-                5000
-        ));
-
-        save(new PlannedPayment(
-                "321",
-                "Ingreso",
-                "Salario",
-                "Pago mensual",
-                now.plusMonths(2),
-                3500000
-        ));
     }
 
     public PlannedPayment save(PlannedPayment pago) {
         return pagoRepository.save(pago);
     }
 
-    public PlannedPayment agregarPago(PlannedPayment pago) {
-        return save(pago);
+    public PlannedPayment findById(int id) {
+        return pagoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Pago con ID " + id + " no encontrado"));
     }
 
-    public PlannedPayment findById(String id) {
-        PlannedPayment pago = pagoRepository.findById(id);
-        if (pago == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID " + id + " no encontrado");
-        }
-        return pago;
+    public List<PlannedPayment> buscarPorFiltros(int userId, String query, String futurePeriod) {
+        LocalDate limitDate = calcularFechaLimite(futurePeriod);
+        return pagoRepository.findByUserIdAndFilters(userId, limitDate, query);
     }
 
-    public List<PlannedPayment> buscarPorFiltros(String userId, String query, String futurePeriod) {
-        return pagoRepository.buscarPorFiltros(userId, query, futurePeriod);
-    }
-
-    public PlannedPayment update(String id, PlannedPayment pago) {
-        findById(id); // Valida que exista
-
-        // Creamos un nuevo objeto con el mismo ID
+    public PlannedPayment update(int id, PlannedPayment pago) {
+        findById(id);
         pago.setId(id);
-        return pagoRepository.update(pago);
+        return pagoRepository.save(pago);
     }
-    
-    public PlannedPayment confirmarPago(String id) {
-        PlannedPayment pp = findById(id); // Valida que exista
-        
-        if (pp.getPaymentDate() != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Pago con ID " + id + " ya fue confirmado");
-        // Creamos un nuevo objeto con el mismo ID
+
+    public PlannedPayment confirmarPago(int id) {
+        PlannedPayment pp = findById(id);
+        if (pp.getPaymentDate() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Pago con ID " + id + " ya fue confirmado");
+        }
         pp.setPaymentDate(LocalDate.now());
-        pagoRepository.update(pp);
-        
-        recordRepository.save(new Record(pp.getUserId(), pp.getType(), LocalDateTime.now(), pp.getCategory(), pp.getName(), pp.getAmount()));
+        pagoRepository.save(pp);
+        recordRepository.save(new Record(
+                pp.getUserId(), pp.getType(), LocalDateTime.now(),
+                pp.getCategory(), pp.getName(), pp.getAmount()
+        ));
         return pp;
     }
 
-    public void deleteById(String id) {
+    public void deleteById(int id) {
         findById(id);
         pagoRepository.deleteById(id);
     }
+
+    private LocalDate calcularFechaLimite(String futurePeriod) {
+        LocalDate hoy = LocalDate.now();
+        if (futurePeriod == null) return null;
+        return switch (futurePeriod.toLowerCase()) {
+            case "1 semana" -> hoy.plusWeeks(1);
+            case "1 mes"    -> hoy.plusMonths(1);
+            case "3 meses"  -> hoy.plusMonths(3);
+            case "6 meses"  -> hoy.plusMonths(6);
+            case "1 año"    -> hoy.plusYears(1);
+            default           -> null;
+        };
+    }
 }
+
