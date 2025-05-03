@@ -1,21 +1,21 @@
 # Etapa de construcción
-FROM ubuntu:latest AS build
+FROM gradle:8.13-jdk21 AS build
 
-RUN apt-get update
-RUN apt-get install openjdk-21-jdk -y
+WORKDIR /home/gradle/project
+COPY --chown=gradle:gradle . .
 
-COPY . .
-
-# Generar el .jar sin ejecutar los tests
+# Construye sin tests
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Etapa de ejecución
 FROM openjdk:21-jdk-slim
 
+WORKDIR /app
 EXPOSE 8080
 
 COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
 
 
