@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'
 	implementation 'mysql:mysql-connector-java:8.0.32'
+	implementation 'com.google.code.gson:gson:2.9.0' // Usa la versión más reciente
 }
 
 tasks.named('test') {

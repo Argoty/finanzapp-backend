@@ -16,10 +16,12 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
         initSampleData();
     }
     
@@ -89,8 +91,8 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(email);
         user.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ESTE CORREO NO ESTA REGISTRADO"));
 
-        EmailService.enviarCorreo("RECUPERACION DE CUENTA PARA: " + user.get().getUsername(),
-                "EMAIL: " + email + "\nCONTRASEÑA: " + user.get().getPassword());
+        emailService.sendRecoveringEmail("RECUPERACION DE CUENTA", email,
+                user.get().getUsername(), user.get().getPassword());
 
         return new ResponseMessage("Se envio un correo de recuperación");
     }

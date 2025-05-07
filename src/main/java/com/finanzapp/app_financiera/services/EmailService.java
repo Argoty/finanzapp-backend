@@ -1,44 +1,31 @@
 package com.finanzapp.app_financiera.services;
 
+import com.finanzapp.app_financiera.dtos.EmailTemplate;
+import com.google.gson.Gson;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
 import java.util.Properties;
 
+@Service
 public class EmailService {
 
+    @Autowired
+    private RestTemplate restTemplate;
     private static final Dotenv dotenv = Dotenv.load();
+    private String url = dotenv.get("EMAILSERVICE_URL");
 
-    public static void enviarCorreo(String asunto, String cuerpo) {
-        final String remitente = dotenv.get("EMAIL");
-        final String clave = dotenv.get("EMAIL_KEY");
+    public void sendRecoveringEmail(String subject, String to, String name, String password) {
+        EmailTemplate template = new EmailTemplate(subject, "simondavidcruzsuazo@gmail.com",
+                new HashMap<>(){{put("name",name);}}, "registro.html");
 
-        final String destinatario = remitente;
-
-        Properties propiedades = new Properties();
-        propiedades.put("mail.smtp.host", "smtp.gmail.com");
-        propiedades.put("mail.smtp.port", "587");
-        propiedades.put("mail.smtp.auth", "true");
-        propiedades.put("mail.smtp.starttls.enable", "true");
-
-        Session sesion = Session.getInstance(propiedades, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(remitente, clave);
-            }
-        });
-
-        try {
-            Message mensaje = new MimeMessage(sesion);
-            mensaje.setFrom(new InternetAddress(remitente));
-            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
-            mensaje.setSubject(asunto);
-            mensaje.setText(cuerpo);
-
-            Transport.send(mensaje);
-            System.out.println("Correo enviado con éxito a " + destinatario);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+            restTemplate.postForEntity(url, template, String.class);
     }
 }
