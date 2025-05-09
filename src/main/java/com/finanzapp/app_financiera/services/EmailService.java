@@ -23,9 +23,9 @@ public class EmailService {
     private String url = dotenv.get("EMAILSERVICE_URL");
 
     public void sendRecoveringEmail(String subject, String to, String name, String password) {
-        EmailTemplate template = new EmailTemplate(subject, "simondavidcruzsuazo@gmail.com",
-                new HashMap<>(){{put("name",name);}}, "registro.html");
+        EmailTemplate template = new EmailTemplate(subject, "cruz.simon.4962@eam.edu.co",
+                new HashMap<>(){{put("name",name); put("email",to); put("password",password);}}, "registro.html");
 
-            restTemplate.postForEntity(url, template, String.class);
+        restTemplate.postForEntity(url, template, String.class);
     }
 }
