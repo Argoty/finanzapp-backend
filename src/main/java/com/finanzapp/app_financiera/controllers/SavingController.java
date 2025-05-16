@@ -31,13 +31,15 @@ public class SavingController {
         @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
         @ApiResponse(responseCode = "404", description = "Ahorro no encontrado")
     })
-    @PutMapping("/{userId}/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Saving> updateSaving(
             @Parameter(description = "Cuerpo del ahorro") @RequestBody Saving saving,
             @Parameter(description = "ID del usuario", required = true) @PathVariable int userId,
-            @Parameter(description = "ID del ahorro", required = true) @PathVariable int id) {
+            @Parameter(description = "ID del ahorro", required = true) @PathVariable int id,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
 
-        return ResponseEntity.ok(savingService.updateSaving(saving, userId, id));
+        return ResponseEntity.ok(savingService.updateSaving(saving, token, id));
     }
 
     @Operation(summary = "Obtener todos los ahorros de un usuario")
@@ -45,11 +47,11 @@ public class SavingController {
         @ApiResponse(responseCode = "200", description = "Lista de ahorros obtenida correctamente"),
         @ApiResponse(responseCode = "404", description = "No se encontraron ahorros para este usuario")
     })
-    @GetMapping("/{userId}")
+    @GetMapping("")
     public ResponseEntity<List<Saving>> findAllSavings(
-            @Parameter(description = "ID del usuario", required = true)
-            @PathVariable int userId) {
-        return ResponseEntity.ok(savingService.findAllSavings(userId));
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(savingService.findAllSavings(token));
     }
 
     @Operation(summary = "Agregar un nuevo ahorro")
@@ -60,8 +62,10 @@ public class SavingController {
     @PostMapping("")
     public ResponseEntity<Saving> addSaving(
             @Parameter(description = "Objeto ahorro que se desea agregar", required = true)
-            @RequestBody Saving saving) {
-        return ResponseEntity.ok(savingService.save(saving));
+            @RequestBody Saving saving,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(savingService.save(saving, token));
     }
 
     @Operation(summary = "Eliminar un ahorro por ID")
@@ -72,8 +76,10 @@ public class SavingController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Saving> deleteSaving(
             @Parameter(description = "ID del ahorro a eliminar", required = true)
-            @PathVariable int id) {
-        return ResponseEntity.ok(savingService.deleteSavingById(id));
+            @PathVariable int id,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(savingService.deleteSavingById(id, token));
     }
 
     @Operation(summary = "Agregar dinero a un ahorro existente")
@@ -82,15 +88,17 @@ public class SavingController {
         @ApiResponse(responseCode = "400", description = "Monto inválido o datos incorrectos"),
         @ApiResponse(responseCode = "404", description = "No se encontró el ahorro o el usuario")
     })
-    @PatchMapping("/{userId}/{savingId}/ahorrar")
+    @PatchMapping("/{savingId}/ahorrar")
     public ResponseEntity<Saving> ahorrar(
             @Parameter(description = "ID del usuario", required = true)
             @PathVariable int userId,
             @Parameter(description = "ID del ahorro", required = true)
             @PathVariable int savingId,
             @Parameter(description = "Monto a ahorrar", required = true, example = "200.0")
-            @RequestParam("amount") double amount) {
-        return ResponseEntity.ok(savingService.saveToSaving(savingId, userId, amount));
+            @RequestParam("amount") double amount,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(savingService.saveToSaving(savingId, token, amount));
     }
 
 }
