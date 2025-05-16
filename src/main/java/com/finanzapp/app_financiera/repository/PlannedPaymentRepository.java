@@ -41,6 +41,6 @@ public interface PlannedPaymentRepository extends JpaRepository<PlannedPayment, 
         @Param("limitDate") LocalDate limitDate,
         @Param("query") String query
     );
-
+    List<PlannedPayment> findByUserId(int userId);
 }
 
