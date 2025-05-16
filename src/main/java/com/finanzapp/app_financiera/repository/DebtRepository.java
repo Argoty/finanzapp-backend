@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DebtRepository extends JpaRepository<Debt, Integer> {
@@ -12,4 +13,5 @@ public interface DebtRepository extends JpaRepository<Debt, Integer> {
     List<Debt> findAllByUserId(int userId);
 
     void deleteById(int id);
+
 }

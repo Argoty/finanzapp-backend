@@ -22,9 +22,9 @@ public class EmailService {
     private static final Dotenv dotenv = Dotenv.load();
     private String url = dotenv.get("EMAILSERVICE_URL");
 
-    public void sendRecoveringEmail(String subject, String to, String name, String password) {
+    public void sendRecoveringEmail(String subject, String to, String name, String recoveryCode) {
         EmailTemplate template = new EmailTemplate(subject, "cruz.simon.4962@eam.edu.co",
-                new HashMap<>(){{put("name",name); put("email",to); put("password",password);}}, "registro.html");
+                new HashMap<>(){{put("name",name); put("codigo",recoveryCode); }}, "registro.html");
 
         restTemplate.postForEntity(url, template, String.class);
     }

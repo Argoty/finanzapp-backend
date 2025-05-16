@@ -1,5 +1,6 @@
 package com.finanzapp.app_financiera.controllers;
 
+import com.finanzapp.app_financiera.dtos.AuthResponse;
 import com.finanzapp.app_financiera.dtos.LoginRequest;
 import com.finanzapp.app_financiera.dtos.ResponseMessage;
 import com.finanzapp.app_financiera.dtos.UserDTO;
@@ -28,6 +29,7 @@ public class UserController {
         this.userService = userService;
     }
 
+
     @Operation(summary = "Obtener todos los usuarios registrados")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuarios obtenidos correctamente"),
@@ -35,9 +37,9 @@ public class UserController {
     })
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsuarios() {
-        List<UserDTO> usuariosDto = userService.findAll();
-        return ResponseEntity.ok(usuariosDto);
+        return ResponseEntity.ok(userService.findAll());
     }
+
 
     @Operation(summary = "Iniciar sesión de un usuario")
     @ApiResponses(value = {
@@ -46,11 +48,12 @@ public class UserController {
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> loginUser(
+    public ResponseEntity<AuthResponse> loginUser(
             @Parameter(description = "Credenciales de inicio de sesión", required = true)
             @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword()));
     }
+
 
     @Operation(summary = "Registrar un nuevo usuario")
     @ApiResponses(value = {
@@ -59,11 +62,12 @@ public class UserController {
         @ApiResponse(responseCode = "409", description = "Correo ya registrado")
     })
     @PostMapping("/registro")
-    public ResponseEntity<UserDTO> signUpUser(
+    public ResponseEntity<AuthResponse> signUpUser(
             @Parameter(description = "Datos del nuevo usuario", required = true)
             @RequestBody User user) {
         return ResponseEntity.ok(userService.signUpUser(user));
     }
+
 
     @Operation(summary = "Recuperar cuenta de usuario")
     @ApiResponses(value = {
@@ -75,5 +79,14 @@ public class UserController {
             @Parameter(description = "Correo electrónico del usuario", required = true)
             @PathVariable String email) {
         return ResponseEntity.ok(userService.recoverAccount(email));
+    }
+
+    public ResponseEntity<String> validateRecoveryToken(String recoveryToken) {
+        return ResponseEntity.ok(userService.validateRecoveryToken(recoveryToken));
+    }
+
+    public ResponseEntity<Void> changePassword(String accessToken, String newPassword) {
+        userService.changePassword(accessToken, newPassword);
+        return ResponseEntity.ok(null);
     }
 }
