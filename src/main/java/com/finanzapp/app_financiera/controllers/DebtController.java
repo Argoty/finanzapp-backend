@@ -47,7 +47,7 @@ public class DebtController {
         @ApiResponse(responseCode = "200", description = "Lista de deudas obtenida correctamente"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<Debt>> findAllDebts(
             @Parameter(description = "Token de sesion", required = true)
             @RequestHeader("Authorization") String token) {
@@ -58,7 +58,7 @@ public class DebtController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Deuda agregada correctamente")
     })
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Debt> addDebt(
             @Parameter(description = "Objeto deuda que se desea agregar", required = true)
             @RequestBody Debt doubt,

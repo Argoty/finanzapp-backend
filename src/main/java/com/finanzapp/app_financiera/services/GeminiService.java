@@ -3,6 +3,7 @@ package com.finanzapp.app_financiera.services;
 import com.finanzapp.app_financiera.models.User;
 import com.finanzapp.app_financiera.configGson.LocalDateAdapter;
 import com.finanzapp.app_financiera.configGson.LocalDateTimeAdapter;
+import com.finanzapp.app_financiera.dtos.ResponseMessage;
 import com.finanzapp.app_financiera.repository.DebtRepository;
 import com.finanzapp.app_financiera.repository.PlannedPaymentRepository;
 import com.finanzapp.app_financiera.repository.RecordRepository;
@@ -15,6 +16,7 @@ import com.google.gson.JsonObject;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -38,8 +40,8 @@ public class GeminiService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String API_KEY = dotenv.get("APIGEMINI_KEY");
+    @Value("${gemini.api.key}")
+    private String API_KEY;
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static final Gson gson = new GsonBuilder()
@@ -100,7 +102,7 @@ public class GeminiService {
         }
     }
 
-    public String handleGeminiRequest(String token, String userPrompt) {
+    public ResponseMessage handleGeminiRequest(String token, String userPrompt) {
         String email = jwtUtil.extractEmailFromAccessToken(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token no valido"));
         User user = userRepository.findByEmail(email)
@@ -136,7 +138,7 @@ public class GeminiService {
                 + datosDeBD + ". fecha de hoy: " + ahora;
 
         String respuestaFinal = generateContent(finalPrompt);
-        return respuestaFinal;
+        return new ResponseMessage(respuestaFinal);
 
     }
 }

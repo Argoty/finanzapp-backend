@@ -72,7 +72,7 @@ public class RecordController {
     }
 
     // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)
-    @GetMapping("/")
+    @GetMapping
     @Operation(summary = "Buscar registros por usuario y filtros", description = "Busca registros financieros para un usuario específico, permitiendo filtrar por una consulta general y un período de tiempo.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de registros encontrados")
