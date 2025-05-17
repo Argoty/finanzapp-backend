@@ -3,7 +3,11 @@ package com.finanzapp.app_financiera.services;
 import com.finanzapp.app_financiera.dtos.CategoryDTO;
 import com.finanzapp.app_financiera.dtos.MontoPeriodoDTO;
 import com.finanzapp.app_financiera.models.Record;
+import com.finanzapp.app_financiera.models.User;
 import com.finanzapp.app_financiera.repository.RecordRepository;
+import com.finanzapp.app_financiera.repository.UserRepository;
+
+import com.finanzapp.app_financiera.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,14 +24,34 @@ import java.util.stream.Collectors;
 @Service
 public class RecordService {
 
+    private final UserRepository userRepository;
     private final RecordRepository recordRepository;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public RecordService(RecordRepository recordRepository) {
+    public RecordService(RecordRepository recordRepository, UserRepository userRepository, JwtUtil jwtUtil) {
         this.recordRepository = recordRepository;
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
-    public Record save(Record record) {
+    private int getUserIdWithToken(String token) {
+        String email = jwtUtil.extractEmailFromAccessToken(token)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token no valido"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        return user.getId();
+    }
+    
+    private void validateTokenWithEntity(Record record, String token) {
+        int userId = getUserIdWithToken(token);
+        if (!(userId == record.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Token no valido");
+        }
+    }
+    
+    public Record save(Record record, String token) {
+        validateTokenWithEntity(record, token);
         return recordRepository.save(record);
     }
 
@@ -37,27 +61,28 @@ public class RecordService {
                 HttpStatus.NOT_FOUND, "Record con ID " + id + " no encontrado"));
     }
 
-    public List<Record> buscarPorFiltros(int userId, String query, String lastPeriod) {
+    public List<Record> buscarPorFiltros(String token, String query, String lastPeriod) {
+        int userId = getUserIdWithToken(token);
+
         LocalDateTime limit = getDateLimit(lastPeriod);
         return recordRepository.findByUserIdAndFilters(userId, limit, query);
     }
 
-    public Record update(int id, Record record) {
+    public Record update(int id, Record record, String token) {
+        validateTokenWithEntity(record, token);
         findById(id);
         record.setId(id);
         return recordRepository.save(record);
     }
 
-    public void deleteById(int id, int userId) {
-        Record record = findById(id);
-        if (record.getUserId() != userId) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "El ID de usuario no coincide con el creador del record");
-        }
+    public void deleteById(int id, String token) {
+        Record record = findById(id);        
+        validateTokenWithEntity(record, token);
         recordRepository.deleteById(id);
     }
 
-    public List<CategoryDTO> obtenerTotalesPorCategory(int userId, String lastPeriod) {
+    public List<CategoryDTO> obtenerTotalesPorCategory(String token, String lastPeriod) {
+        int userId = getUserIdWithToken(token);
         // Calcula la fecha límite según el periodo seleccionado
         LocalDateTime limit = getDateLimit(lastPeriod);
 
@@ -78,7 +103,9 @@ public class RecordService {
                 .collect(Collectors.toList());
     }
 
-    public List<MontoPeriodoDTO> obtenerBucketsPorPeriodo(int userId, String lastPeriod) {
+    public List<MontoPeriodoDTO> obtenerBucketsPorPeriodo(String token, String lastPeriod) {
+        int userId = getUserIdWithToken(token);
+        
         LocalDate today = LocalDate.now();
         LocalDate start;
         int buckets;

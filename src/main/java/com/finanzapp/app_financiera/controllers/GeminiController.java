@@ -18,9 +18,9 @@ public class GeminiController {
         this.geminiService = geminiService;
     }
 
-    @PostMapping("/content/{userId}")
-    public ResponseEntity<String> generateContent(@PathVariable @Parameter(description = "ID del usuario para obtener los totales") int userId, @RequestBody ResponseMessage request) {
-        String result = geminiService.handleGeminiRequest(userId, request.getMessage());
+    @PostMapping("/content")
+    public ResponseEntity<String> generateContent(@RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token, @RequestBody ResponseMessage request) {
+        String result = geminiService.handleGeminiRequest(token, request.getMessage());
         return ResponseEntity.ok(result);
     }
 }
