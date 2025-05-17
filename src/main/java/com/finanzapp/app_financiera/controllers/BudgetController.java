@@ -34,8 +34,9 @@ public class BudgetController {
         @ApiResponse(responseCode = "201", description = "Presupuesto creado con éxito"),
         @ApiResponse(responseCode = "400", description = "Datos de presupuesto inválidos")
     })
-    public ResponseEntity<Budget> createBudget(@RequestBody @Parameter(description = "Datos del presupuesto a crear") Budget budget) {
-        Budget newBudget = budgetService.agregarPresupuesto(budget);
+    public ResponseEntity<Budget> createBudget(@RequestBody @Parameter(description = "Datos del presupuesto a crear") Budget budget,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        Budget newBudget = budgetService.save(budget, token);
         return new ResponseEntity<>(newBudget, HttpStatus.CREATED);
     }
 
@@ -47,8 +48,10 @@ public class BudgetController {
         @ApiResponse(responseCode = "404", description = "Presupuesto no encontrado"),
         @ApiResponse(responseCode = "400", description = "Datos de presupuesto inválidos")
     })
-    public ResponseEntity<Budget> updateBudget(@PathVariable @Parameter(description = "ID del presupuesto a actualizar") int id, @RequestBody @Parameter(description = "Nuevos datos del presupuesto") Budget budget) {
-        Budget updatedBudget = budgetService.update(id, budget);
+    public ResponseEntity<Budget> updateBudget(@PathVariable @Parameter(description = "ID del presupuesto a actualizar") int id,
+            @RequestBody @Parameter(description = "Nuevos datos del presupuesto") Budget budget,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        Budget updatedBudget = budgetService.update(id, budget, token);
         return new ResponseEntity<>(updatedBudget, HttpStatus.OK);
     }
 
@@ -59,19 +62,21 @@ public class BudgetController {
         @ApiResponse(responseCode = "204", description = "Presupuesto eliminado con éxito"),
         @ApiResponse(responseCode = "404", description = "Presupuesto no encontrado")
     })
-    public ResponseEntity<Void> deleteBudget(@PathVariable @Parameter(description = "ID del presupuesto a eliminar") int id) {
-        budgetService.deleteById(id);
+    public ResponseEntity<Void> deleteBudget(@PathVariable @Parameter(description = "ID del presupuesto a eliminar") int id,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        budgetService.deleteById(id, token);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/status/{userId}")
+    @GetMapping("/status")
     @Operation(summary = "Obtener el estado de todos los presupuestos de un usuario", description = "Obtiene el estado actual de todos los presupuestos para un usuario específico, con opción de filtrar por período.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista del estado de los presupuestos")
     })
-    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus(@PathVariable @Parameter(description = "ID del usuario para obtener el estado de los presupuestos") int userId, 
+    public ResponseEntity<List<BudgetStatusResponse>> getAllBudgetsStatus(
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token,
             @RequestParam(required = false) @Parameter(description = "Período para filtrar los presupuestos (ej: 'semanal', 'mensual', 'trimestral', 'semestral', 'anual') (opcional)") String period) {
-        List<BudgetStatusResponse> statusList = budgetService.getAllBudgetsStatus(userId, period);
+        List<BudgetStatusResponse> statusList = budgetService.getAllBudgetsStatus(token, period);
         return ResponseEntity.ok(statusList);
     }
 }

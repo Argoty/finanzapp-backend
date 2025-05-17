@@ -35,8 +35,9 @@ public class RecordController {
             @ApiResponse(responseCode = "201", description = "Registro creado con éxito"),
             @ApiResponse(responseCode = "400", description = "Datos de registro inválidos")
     })
-    public ResponseEntity<Record> createRecord(@RequestBody @Parameter(description = "Datos del registro a crear") Record record) {
-        Record newRecord = recordService.save(record);
+    public ResponseEntity<Record> createRecord(@RequestBody @Parameter(description = "Datos del registro a crear") Record record,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        Record newRecord = recordService.save(record, token);
         return new ResponseEntity<>(newRecord, HttpStatus.CREATED);
     }
 
@@ -50,13 +51,14 @@ public class RecordController {
     })
     public ResponseEntity<Record> updateRecord(
             @PathVariable @Parameter(description = "ID del registro a actualizar") int id,
-            @RequestBody @Parameter(description = "Nuevos datos del registro") Record record) {
-        Record updatedRecord = recordService.update(id, record);
+            @RequestBody @Parameter(description = "Nuevos datos del registro") Record record,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        Record updatedRecord = recordService.update(id, record, token);
         return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
     }
 
     // Elimina un record por ID
-    @DeleteMapping("/{id}/{userId}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar un registro por ID", description = "Elimina un registro financiero específico basado en su ID y el ID del usuario.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Registro eliminado con éxito"),
@@ -64,47 +66,47 @@ public class RecordController {
     })
     public ResponseEntity<Void> deleteRecord(
             @PathVariable @Parameter(description = "ID del registro a eliminar") int id,
-            @PathVariable @Parameter(description = "ID del usuario que creó el registro") int userId) {
-        recordService.deleteById(id, userId);
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token) {
+        recordService.deleteById(id, token);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // Busca records aplicando filtro de búsqueda general y filtro de registros recientes (último período)
-    @GetMapping("/{userId}")
+    @GetMapping
     @Operation(summary = "Buscar registros por usuario y filtros", description = "Busca registros financieros para un usuario específico, permitiendo filtrar por una consulta general y un período de tiempo.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de registros encontrados")
     })
     public ResponseEntity<List<Record>> buscarRecords(
-            @PathVariable @Parameter(description = "ID del usuario para buscar registros") int userId,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token,
             @RequestParam(required = false) @Parameter(description = "Término de búsqueda general (opcional)") String query,
             @RequestParam(required = false) @Parameter(description = "Filtro de período reciente (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año') (opcional)") String lastPeriod) {
-        List<Record> records = recordService.buscarPorFiltros(userId, query, lastPeriod);
+        List<Record> records = recordService.buscarPorFiltros(token, query, lastPeriod);
         return new ResponseEntity<>(records, HttpStatus.OK);
     }
 
-    @GetMapping("/categories/{userId}")
+    @GetMapping("/categories")
     @Operation(summary = "Obtener totales de gastos por categoría", description = "Obtiene los totales de gastos agrupados por categoría para un usuario específico, con opción de filtrar por período.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de totales por categoría")
     })
     public ResponseEntity<List<CategoryDTO>> getTotalesPorCategory(
-            @PathVariable @Parameter(description = "ID del usuario para obtener los totales") int userId,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token,
             @RequestParam(required = false) @Parameter(description = "Filtro de período (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año') (opcional)") String lastPeriod) {
-        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(userId, lastPeriod);
+        List<CategoryDTO> totales = recordService.obtenerTotalesPorCategory(token, lastPeriod);
         return new ResponseEntity<>(totales, HttpStatus.OK);
     }
 
-    @GetMapping("/buckets/{userId}")
+    @GetMapping("/buckets")
     @Operation(summary = "Obtener buckets de ingresos y gastos por período", description = "Obtiene los montos de ingresos y gastos agrupados en buckets según un período especificado para un usuario.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de buckets por período"),
             @ApiResponse(responseCode = "400", description = "Formato de período no válido")
     })
     public ResponseEntity<List<MontoPeriodoDTO>> getBucketsPorPeriodo(
-            @PathVariable @Parameter(description = "ID del usuario para obtener los buckets") int userId,
+            @RequestHeader("Authorization") @Parameter(description = "Token de sesion", required = true) String token,
             @RequestParam @Parameter(description = "Período para agrupar los buckets (ej: '1 semana', '1 mes', '3 meses', '6 meses', '1 año')") String lastPeriod) {
-        List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(userId, lastPeriod);
+        List<MontoPeriodoDTO> buckets = recordService.obtenerBucketsPorPeriodo(token, lastPeriod);
         return new ResponseEntity<>(buckets, HttpStatus.OK);
     }
 }
