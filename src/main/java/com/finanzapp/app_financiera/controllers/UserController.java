@@ -1,9 +1,6 @@
 package com.finanzapp.app_financiera.controllers;
 
-import com.finanzapp.app_financiera.dtos.AuthResponse;
-import com.finanzapp.app_financiera.dtos.LoginRequest;
-import com.finanzapp.app_financiera.dtos.ResponseMessage;
-import com.finanzapp.app_financiera.dtos.UserDTO;
+import com.finanzapp.app_financiera.dtos.*;
 import com.finanzapp.app_financiera.models.User;
 import com.finanzapp.app_financiera.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +30,7 @@ public class UserController {
     @Operation(summary = "Obtener todos los usuarios registrados")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuarios obtenidos correctamente"),
-        @ApiResponse(responseCode = "500", description = "Error del servidor")
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsuarios() {
@@ -69,7 +66,7 @@ public class UserController {
     }
 
 
-    @Operation(summary = "Recuperar cuenta de usuario")
+    @Operation(summary = "Recuperar cuenta de usuario, envia codigo al correo")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Correo de recuperación enviado"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
@@ -81,12 +78,33 @@ public class UserController {
         return ResponseEntity.ok(userService.recoverAccount(email));
     }
 
-    public ResponseEntity<String> validateRecoveryToken(String recoveryToken) {
-        return ResponseEntity.ok(userService.validateRecoveryToken(recoveryToken));
+    @Operation(summary = "Validar codigo de recuperacion")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Codigo valido"),
+            @ApiResponse(responseCode = "404", description = "ESTE CORREO NO ESTA REGISTRADO"),
+            @ApiResponse(responseCode = "401", description = "CODIGO MALFORMADO O EXPIRADO"),
+            @ApiResponse(responseCode = "401", description = "CODIGO NO VALIDO, REINTENTA")
+    })
+    @PostMapping("/recuperar/validarCodigo")
+    public ResponseEntity<ResponseMessage> validateRecoveryCode(
+            @Parameter(description = "Correo electrónico y codigo de recuperacion del usuario", required = true)
+            @PathVariable @RequestBody ValidateCodeRequest request) {
+        return ResponseEntity.ok(userService.validateRecoveryCode(request.getEmail(), request.getRecoveryCode()));
     }
 
-    public ResponseEntity<Void> changePassword(String accessToken, String newPassword) {
-        userService.changePassword(accessToken, newPassword);
-        return ResponseEntity.ok(null);
+
+    @Operation(summary = "Cambiar contraseña para recuperar cuenta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contraseña actualizada correctamente"),
+            @ApiResponse(responseCode = "404", description = "ESTE CORREO NO ESTA REGISTRADO"),
+            @ApiResponse(responseCode = "401", description = "CODIGO MALFORMADO O EXPIRADO"),
+            @ApiResponse(responseCode = "401", description = "CODIGO NO VALIDO, REINTENTA"),
+            @ApiResponse(responseCode = "400", description = "LA CONTRASEÑA DEBE TENER AL MENOS 8 CARACTERES"),
+    })
+    @PostMapping("/recuperar/cambiarClave")
+    public ResponseEntity<ResponseMessage> changePassword(
+            @Parameter(description = "Correo electrónico, codigo de recuperacion y nueva contraseña del usuario", required = true)
+            @PathVariable @RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(userService.changePassword(request.getEmail(), request.getRecoveryCode(), request.getNewPassword()));
     }
 }

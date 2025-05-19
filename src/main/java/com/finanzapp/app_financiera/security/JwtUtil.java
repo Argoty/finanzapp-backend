@@ -14,56 +14,31 @@ import java.util.Optional;
 @Component
 public class JwtUtil {
     private final SecretKey ACCESS_TOKEN_KEY;
-    private final SecretKey RECOVERY_TOKEN_KEY;
 
-    public JwtUtil(
-        @Value("${access.token.key}") String accessToken,
-        @Value("${recovery.token.key}") String recoveryToken
-    ) {
+    public JwtUtil(@Value("${access.token.key}") String accessToken) {
         this.ACCESS_TOKEN_KEY = Keys.hmacShaKeyFor(accessToken.getBytes(StandardCharsets.UTF_8));
-        this.RECOVERY_TOKEN_KEY = Keys.hmacShaKeyFor(recoveryToken.getBytes(StandardCharsets.UTF_8));
     }
 
     private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1 hora
-    private final long RECOVERY_TOKEN_VALIDITY = 1000 * 60 * 10; // 10 minutos
 
     public String generateAccessToken(User user) {
-        return generateToken(user, ACCESS_TOKEN_KEY, ACCESS_TOKEN_VALIDITY);
-    }
-
-    public String generateRecoveryToken(User user) {
-        return generateToken(user, RECOVERY_TOKEN_KEY, RECOVERY_TOKEN_VALIDITY);
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY))
+                .signWith(ACCESS_TOKEN_KEY, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     public Optional<String> extractEmailFromAccessToken(String token) {
         Optional<String> e = extractEmail(token, ACCESS_TOKEN_KEY);
-        System.out.println("BBBBB--.. " + e.orElse(null));
         return e;
-    }
-
-    public Optional<String> extractEmailFromRecoveryToken(String token) {
-        return extractEmail(token, RECOVERY_TOKEN_KEY);
     }
 
     public boolean validateAccessToken(String token, User user) {
         return extractEmailFromAccessToken(token)
                 .map(email -> email.equals(user.getEmail()) && !isExpired(token, ACCESS_TOKEN_KEY))
                 .orElse(false);
-    }
-
-    public boolean validateRecoveryToken(String token, User user) {
-        return extractEmailFromRecoveryToken(token)
-                .map(email -> email.equals(user.getEmail()) && !isExpired(token, RECOVERY_TOKEN_KEY))
-                .orElse(false);
-    }
-
-    private String generateToken(User user, SecretKey key, long validity) {
-        return Jwts.builder()
-                .setSubject(user.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + validity))
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
     }
 
     private Optional<String> extractEmail(String token, SecretKey key) {
