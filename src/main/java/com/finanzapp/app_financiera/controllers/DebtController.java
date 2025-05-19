@@ -28,69 +28,81 @@ public class DebtController {
 
     @Operation(summary = "Actualizar una deuda existente de un usuario")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Deuda actualizada correctamente"),
-        @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
-        @ApiResponse(responseCode = "404", description = "Deuda no encontrada")
+            @ApiResponse(responseCode = "200", description = "Deuda actualizada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+            @ApiResponse(responseCode = "404", description = "Deuda no encontrada"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
-    @PutMapping("/{userId}/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Debt> updateDebt(
             @Parameter(description = "Cuerpo de la deuda") @RequestBody Debt debt,
-            @Parameter(description = "ID del usuario", required = true) @PathVariable int userId,
-            @Parameter(description = "ID de la deuda", required = true) @PathVariable int id) {
-
-        return ResponseEntity.ok(debtService.updateDebt(debt, userId, id));
+            @Parameter(description = "ID de la deuda", required = true) @PathVariable int id,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(debtService.updateDebt(debt, token, id));
     }
+
 
     @Operation(summary = "Obtener todas las deudas de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de deudas obtenida correctamente"),
-        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
-    @GetMapping("/{userId}")
+    @GetMapping
     public ResponseEntity<List<Debt>> findAllDebts(
-            @Parameter(description = "ID del usuario", required = true)
-            @PathVariable int userId) {
-        return ResponseEntity.ok(debtService.findAllDebts(userId));
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(debtService.findAllDebts(token));
     }
+
 
     @Operation(summary = "Agregar una nueva deuda")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Deuda agregada correctamente")
+        @ApiResponse(responseCode = "200", description = "Deuda agregada correctamente"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Debt> addDebt(
             @Parameter(description = "Objeto deuda que se desea agregar", required = true)
-            @RequestBody Debt doubt) {
-        return ResponseEntity.ok(debtService.save(doubt));
+            @RequestBody Debt doubt,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token){
+        return ResponseEntity.ok(debtService.save(doubt, token));
     }
+
 
     @Operation(summary = "Eliminar una deuda por ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Deuda eliminada correctamente"),
-        @ApiResponse(responseCode = "404", description = "Deuda no encontrada")
+        @ApiResponse(responseCode = "404", description = "Deuda no encontrada"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Debt> deleteDebt(
             @Parameter(description = "ID de la deuda a eliminar", required = true)
-            @PathVariable int id) {
-        return ResponseEntity.ok(debtService.deleteDebtById(id));
+            @PathVariable int id,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(debtService.deleteDebtById(id, token));
     }
+
 
     @Operation(summary = "Abonar a una deuda existente de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Abono realizado correctamente"),
         @ApiResponse(responseCode = "400", description = "Monto inválido o datos incorrectos"),
-        @ApiResponse(responseCode = "404", description = "No se encontró la deuda o el usuario")
+        @ApiResponse(responseCode = "404", description = "No se encontró la deuda o el usuario"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
-    @PatchMapping("/{userId}/{debtId}/abonar")
+    @PatchMapping("/{debtId}/abonar")
     public ResponseEntity<Debt> abonarDeuda(
-            @Parameter(description = "ID del usuario", required = true)
-            @PathVariable int userId,
             @Parameter(description = "ID de la deuda", required = true)
             @PathVariable int debtId,
             @Parameter(description = "Monto a abonar", required = true, example = "150.0")
-            @RequestParam("amount") double amount) {
-        return ResponseEntity.ok(debtService.payDebt(debtId, userId, amount));
+            @RequestParam("amount") double amount,
+            @Parameter(description = "Token de sesion", required = true)
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(debtService.payDebt(debtId, amount, token));
     }
-
 }

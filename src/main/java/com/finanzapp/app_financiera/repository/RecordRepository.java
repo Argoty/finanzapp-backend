@@ -11,7 +11,8 @@ import java.util.List;
 
 @Repository
 public interface RecordRepository extends JpaRepository<Record, Integer> {
-
+    List<Record> findByUserId(int userId);
+    List<Record> findAllByUserIdAndType(int userId, String type);
     /* Método que busca registros (records) de un usuario con filtros opcionales:
      - Si se pasa `dateLimit`, solo trae registros desde esa fecha en adelante.
      - Si se pasa `query`, busca coincidencias parciales en varios campos: tipo, descripción, categoría, monto o fecha formateada.

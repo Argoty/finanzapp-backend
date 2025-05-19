@@ -1,44 +1,37 @@
 package com.finanzapp.app_financiera.services;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import java.util.Properties;
+import com.finanzapp.app_financiera.dtos.EmailTemplate;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+
+@Service
 public class EmailService {
+    @Autowired
+    private RestTemplate restTemplate;
+    
+    @Value("${emailservice.url}")
+    private String url;
 
-    private static final Dotenv dotenv = Dotenv.load();
-
-    public static void enviarCorreo(String asunto, String cuerpo) {
-        final String remitente = dotenv.get("EMAIL");
-        final String clave = dotenv.get("EMAIL_KEY");
-
-        final String destinatario = remitente;
-
-        Properties propiedades = new Properties();
-        propiedades.put("mail.smtp.host", "smtp.gmail.com");
-        propiedades.put("mail.smtp.port", "587");
-        propiedades.put("mail.smtp.auth", "true");
-        propiedades.put("mail.smtp.starttls.enable", "true");
-
-        Session sesion = Session.getInstance(propiedades, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(remitente, clave);
-            }
-        });
-
+    public void sendRecoveringEmail(String subject, String to, String name, String recoveryCode) {
         try {
-            Message mensaje = new MimeMessage(sesion);
-            mensaje.setFrom(new InternetAddress(remitente));
-            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
-            mensaje.setSubject(asunto);
-            mensaje.setText(cuerpo);
+            EmailTemplate template = new EmailTemplate(subject, "cruz.simon.4962@eam.edu.co",
+                    new HashMap<>() {{
+                        put("name", name);
+                        put("code", recoveryCode);
+                    }}, "registro.html");
 
-            Transport.send(mensaje);
-            System.out.println("Correo enviado con éxito a " + destinatario);
-        } catch (MessagingException e) {
-            e.printStackTrace();
+            restTemplate.postForEntity(url, template, String.class);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo enviar el email, intenta mas tarde");
         }
     }
+
 }
