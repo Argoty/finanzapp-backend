@@ -25,16 +25,17 @@ public class SavingController {
         this.savingService = savingService;
     }
 
+
     @Operation(summary = "Actualizar un ahorro existente de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Ahorro actualizado correctamente"),
         @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
-        @ApiResponse(responseCode = "404", description = "Ahorro no encontrado")
+        @ApiResponse(responseCode = "404", description = "Ahorro no encontrado"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Saving> updateSaving(
             @Parameter(description = "Cuerpo del ahorro") @RequestBody Saving saving,
-            @Parameter(description = "ID del usuario", required = true) @PathVariable int userId,
             @Parameter(description = "ID del ahorro", required = true) @PathVariable int id,
             @Parameter(description = "Token de sesion", required = true)
             @RequestHeader("Authorization") String token) {
@@ -42,10 +43,12 @@ public class SavingController {
         return ResponseEntity.ok(savingService.updateSaving(saving, token, id));
     }
 
+
     @Operation(summary = "Obtener todos los ahorros de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de ahorros obtenida correctamente"),
-        @ApiResponse(responseCode = "404", description = "No se encontraron ahorros para este usuario")
+        @ApiResponse(responseCode = "404", description = "No se encontraron ahorros para este usuario"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @GetMapping("")
     public ResponseEntity<List<Saving>> findAllSavings(
@@ -54,10 +57,12 @@ public class SavingController {
         return ResponseEntity.ok(savingService.findAllSavings(token));
     }
 
+
     @Operation(summary = "Agregar un nuevo ahorro")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Ahorro agregado correctamente"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos (ID de usuario, título o montos incorrectos)")
+        @ApiResponse(responseCode = "400", description = "Datos inválidos (ID de usuario, título o montos incorrectos)"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @PostMapping("")
     public ResponseEntity<Saving> addSaving(
@@ -68,10 +73,12 @@ public class SavingController {
         return ResponseEntity.ok(savingService.save(saving, token));
     }
 
+
     @Operation(summary = "Eliminar un ahorro por ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Ahorro eliminado correctamente"),
-        @ApiResponse(responseCode = "404", description = "Ahorro no encontrado")
+        @ApiResponse(responseCode = "404", description = "Ahorro no encontrado"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Saving> deleteSaving(
@@ -82,16 +89,16 @@ public class SavingController {
         return ResponseEntity.ok(savingService.deleteSavingById(id, token));
     }
 
+
     @Operation(summary = "Agregar dinero a un ahorro existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Dinero ahorrado correctamente"),
         @ApiResponse(responseCode = "400", description = "Monto inválido o datos incorrectos"),
-        @ApiResponse(responseCode = "404", description = "No se encontró el ahorro o el usuario")
+        @ApiResponse(responseCode = "404", description = "No se encontró el ahorro o el usuario"),
+            @ApiResponse(responseCode = "403", description = "TOKEN NO VALIDO")
     })
     @PatchMapping("/{savingId}/ahorrar")
     public ResponseEntity<Saving> ahorrar(
-            @Parameter(description = "ID del usuario", required = true)
-            @PathVariable int userId,
             @Parameter(description = "ID del ahorro", required = true)
             @PathVariable int savingId,
             @Parameter(description = "Monto a ahorrar", required = true, example = "200.0")

@@ -97,7 +97,7 @@ public class DebtService {
         return debtRepository.save(debt);
     }
 
-    public Debt payDebt(int id, int userId, double payment, String token) {
+    public Debt payDebt(int id, double payment, String token) {
         Optional<Debt> debt = debtRepository.findById(id);
         debt.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deuda no encontrada"));
 
