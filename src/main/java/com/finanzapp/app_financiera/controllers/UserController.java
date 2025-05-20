@@ -88,7 +88,7 @@ public class UserController {
     @PostMapping("/recuperar/validarCodigo")
     public ResponseEntity<ResponseMessage> validateRecoveryCode(
             @Parameter(description = "Correo electrónico y codigo de recuperacion del usuario", required = true)
-            @PathVariable @RequestBody ValidateCodeRequest request) {
+            @RequestBody ValidateCodeRequest request) {
         return ResponseEntity.ok(userService.validateRecoveryCode(request.getEmail(), request.getRecoveryCode()));
     }
 
@@ -104,7 +104,7 @@ public class UserController {
     @PostMapping("/recuperar/cambiarClave")
     public ResponseEntity<ResponseMessage> changePassword(
             @Parameter(description = "Correo electrónico, codigo de recuperacion y nueva contraseña del usuario", required = true)
-            @PathVariable @RequestBody ChangePasswordRequest request) {
+            @RequestBody ChangePasswordRequest request) {
         return ResponseEntity.ok(userService.changePassword(request.getEmail(), request.getRecoveryCode(), request.getNewPassword()));
     }
 }
